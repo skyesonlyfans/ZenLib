@@ -25,6 +25,10 @@
         }
         html { scroll-behavior: smooth; }
         body { background-color: var(--primary-bg); color: var(--primary-text); font-family: 'Inter', sans-serif; }
+        /* Lock body scroll when reader is active */
+        body.reader-active {
+            overflow: hidden;
+        }
         .zen-scrollbar::-webkit-scrollbar { width: 8px; }
         .zen-scrollbar::-webkit-scrollbar-track { background: var(--secondary-bg); border-radius: 10px; }
         .zen-scrollbar::-webkit-scrollbar-thumb { background: var(--tertiary-bg); border-radius: 10px; }
@@ -53,7 +57,6 @@
             width: 100%;
             background-color: #fff; /* Set a background for the book pages */
             color: #000;
-            user-select: none; /* Prevent text selection during swipe */
         }
     </style>
 </head>
@@ -183,12 +186,17 @@
                 <h3 id="reader-title" class="font-bold text-lg truncate">Book Title</h3>
                 <p id="reader-author" class="text-sm text-secondary-text truncate">Author</p>
             </div>
-            <div class="flex items-center space-x-3 flex-shrink-0">
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <!-- MODIFIED: Page turn controls moved here -->
+                <div id="epub-controls" class="hidden items-center space-x-1">
+                    <button id="prev-page" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+                    <button id="next-page" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+                </div>
                 <div id="pdf-controls" class="hidden items-center space-x-3">
                     <span class="text-sm text-secondary-text hidden sm:inline">Page:</span>
                     <input type="number" id="reader-page-input" class="bg-tertiary-bg rounded-md w-20 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
                 </div>
-                <button onclick="APP.closeReader()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x"></i></button>
+                <button onclick="APP.closeReader()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
         </div>
         <div id="reader-content" class="flex-grow w-full h-full relative">
@@ -197,11 +205,7 @@
             </div>
             <!-- Reader content (EPUB or PDF) will be injected here -->
             <div id="epub-viewer" class="w-full h-full"></div>
-            <!-- OPTIMIZED: Nav buttons are now smaller and only visible on desktop. Swipe is the primary mobile navigation. -->
-            <div id="epub-nav" class="hidden">
-                 <button id="prev-page" class="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white/80 hover:text-white transition-colors z-20 hidden md:block"><i data-lucide="chevron-left" class="w-8 h-8"></i></button>
-                 <button id="next-page" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white/80 hover:text-white transition-colors z-20 hidden md:block"><i data-lucide="chevron-right" class="w-8 h-8"></i></button>
-            </div>
+            <!-- REMOVED: Old nav buttons were here -->
         </div>
     </div>
     
@@ -451,6 +455,7 @@
 
             // --- E-BOOK READER ---
             openReader(book) {
+                document.body.classList.add('reader-active'); // Lock body scroll
                 const modal = document.getElementById('ebook-reader-modal');
                 const readerLoader = document.getElementById('reader-loader');
                 document.getElementById('reader-title').textContent = book.title;
@@ -460,7 +465,7 @@
                 readerLoader.style.display = 'flex';
 
                 const isEpub = book.fileUrl.endsWith('.epub');
-                document.getElementById('epub-nav').style.display = isEpub ? 'block' : 'none';
+                document.getElementById('epub-controls').style.display = isEpub ? 'flex' : 'none';
                 document.getElementById('pdf-controls').style.display = isEpub ? 'none' : 'flex';
                 const viewer = document.getElementById('epub-viewer');
                 viewer.innerHTML = ''; // Clear previous content
@@ -492,6 +497,7 @@
             },
 
             closeReader() {
+                 document.body.classList.remove('reader-active'); // Unlock body scroll
                  const bookId = document.getElementById('ebook-reader-modal').dataset.bookId;
                  if (this.state.currentEpub) {
                     this.state.currentEpub.destroy();
@@ -699,32 +705,6 @@
                 // Reader navigation (click for desktop)
                 document.getElementById('prev-page').addEventListener('click', () => this.state.currentEpubRendition?.prev());
                 document.getElementById('next-page').addEventListener('click', () => this.state.currentEpubRendition?.next());
-
-                // OPTIMIZATION: Added swipe gesture for page turning on touch devices.
-                const readerContent = document.getElementById('reader-content');
-                let touchStartX = 0;
-                let touchEndX = 0;
-
-                const handleSwipeGesture = () => {
-                    // Ignore if not a significant swipe
-                    if (Math.abs(touchEndX - touchStartX) < 50) return;
-
-                    if (touchEndX < touchStartX) {
-                        this.state.currentEpubRendition?.next(); // Swiped left
-                    }
-                    if (touchEndX > touchStartX) {
-                        this.state.currentEpubRendition?.prev(); // Swiped right
-                    }
-                }
-
-                readerContent.addEventListener('touchstart', (e) => {
-                    touchStartX = e.changedTouches[0].screenX;
-                }, { passive: true });
-
-                readerContent.addEventListener('touchend', (e) => {
-                    touchEndX = e.changedTouches[0].screenX;
-                    handleSwipeGesture();
-                }, { passive: true });
             }
         };
 
@@ -745,3 +725,4 @@
     </script>
 </body>
 </html>
+
