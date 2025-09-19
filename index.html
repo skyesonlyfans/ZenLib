@@ -6,7 +6,7 @@
     <title>ZenLib by Skye &lt;3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- New E-book reader library -->
+    <!-- E-book reader library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,14 +53,7 @@
             width: 100%;
             background-color: #fff; /* Set a background for the book pages */
             color: #000;
-        }
-        #ebook-reader-modal .epubjs-arrow {
-            font-size: 40px;
-            background: rgba(0,0,0,0.2);
-            color: white;
-            padding: 0 10px;
-            line-height: 1;
-            border-radius: 5px;
+            user-select: none; /* Prevent text selection during swipe */
         }
     </style>
 </head>
@@ -204,9 +197,10 @@
             </div>
             <!-- Reader content (EPUB or PDF) will be injected here -->
             <div id="epub-viewer" class="w-full h-full"></div>
+            <!-- OPTIMIZED: Nav buttons are now smaller and only visible on desktop. Swipe is the primary mobile navigation. -->
             <div id="epub-nav" class="hidden">
-                 <button id="prev-page" class="absolute left-0 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white/80 hover:bg-black/10 h-full w-1/4 z-20"><i data-lucide="chevron-left" class="w-8 h-8"></i></button>
-                 <button id="next-page" class="absolute right-0 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white/80 hover:bg-black/10 h-full w-1/4 z-20"><i data-lucide="chevron-right" class="w-8 h-8"></i></button>
+                 <button id="prev-page" class="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white/80 hover:text-white transition-colors z-20 hidden md:block"><i data-lucide="chevron-left" class="w-8 h-8"></i></button>
+                 <button id="next-page" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white/80 hover:text-white transition-colors z-20 hidden md:block"><i data-lucide="chevron-right" class="w-8 h-8"></i></button>
             </div>
         </div>
     </div>
@@ -576,7 +570,10 @@
                 e.preventDefault();
                 const user = document.getElementById('admin-user').value;
                 const pass = document.getElementById('admin-pass').value;
-                // THIS IS NOT SECURE.
+                // SECURITY WARNING: This is NOT a secure way to handle authentication.
+                // The credentials are hardcoded directly in the client-side code,
+                // making them easily accessible to anyone who inspects the page source.
+                // For a real application, use a secure authentication method like Firebase Auth.
                 if (user === 'skye' && pass === '639411') {
                     this.state.isAdmin = true;
                     this.closeAdminLogin();
@@ -699,9 +696,35 @@
                 document.getElementById('player-speed-btn').addEventListener('click', (e) => { e.stopPropagation(); this.PLAYER.toggleSpeedMenu(); });
                 document.body.addEventListener('click', () => document.getElementById('player-speed-menu').classList.add('hidden'));
 
-                // Reader navigation
+                // Reader navigation (click for desktop)
                 document.getElementById('prev-page').addEventListener('click', () => this.state.currentEpubRendition?.prev());
                 document.getElementById('next-page').addEventListener('click', () => this.state.currentEpubRendition?.next());
+
+                // OPTIMIZATION: Added swipe gesture for page turning on touch devices.
+                const readerContent = document.getElementById('reader-content');
+                let touchStartX = 0;
+                let touchEndX = 0;
+
+                const handleSwipeGesture = () => {
+                    // Ignore if not a significant swipe
+                    if (Math.abs(touchEndX - touchStartX) < 50) return;
+
+                    if (touchEndX < touchStartX) {
+                        this.state.currentEpubRendition?.next(); // Swiped left
+                    }
+                    if (touchEndX > touchStartX) {
+                        this.state.currentEpubRendition?.prev(); // Swiped right
+                    }
+                }
+
+                readerContent.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                readerContent.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipeGesture();
+                }, { passive: true });
             }
         };
 
