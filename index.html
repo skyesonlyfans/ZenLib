@@ -20,90 +20,29 @@
             --accent-color: #38bdf8; /* Sky 400 */
             --accent-hover: #0ea5e9; /* Sky 500 */
         }
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            background-color: var(--primary-bg);
-            color: var(--primary-text);
-            font-family: 'Inter', sans-serif;
-        }
+        html { scroll-behavior: smooth; }
+        body { background-color: var(--primary-bg); color: var(--primary-text); font-family: 'Inter', sans-serif; }
         .zen-scrollbar::-webkit-scrollbar { width: 8px; }
         .zen-scrollbar::-webkit-scrollbar-track { background: var(--secondary-bg); border-radius: 10px; }
         .zen-scrollbar::-webkit-scrollbar-thumb { background: var(--tertiary-bg); border-radius: 10px; }
         .zen-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--border-color); }
         .view { display: none; }
         .view.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-
-        #audio-player-container {
-            transition: transform 0.3s ease-in-out;
-            transform: translateY(100%);
-        }
-        #audio-player-container.active {
-            transform: translateY(0);
-        }
-        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        #audio-player-container { transition: transform 0.3s ease-in-out; transform: translateY(100%); }
+        #audio-player-container.active { transform: translateY(0); }
         .progress-bar { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: var(--tertiary-bg); outline: none; border-radius: 6px; transition: opacity .2s; }
         .progress-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: var(--accent-color); cursor: pointer; border-radius: 50%; border: 2px solid var(--secondary-bg); }
         .progress-bar::-moz-range-thumb { width: 16px; height: 16px; background: var(--accent-color); cursor: pointer; border-radius: 50%; border: 2px solid var(--secondary-bg); }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loader {
-            border: 4px solid var(--tertiary-bg);
-            border-top: 4px solid var(--accent-color);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-        }
-
-        #toast-notification {
-            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-            transform: translateY(100%);
-            opacity: 0;
-        }
-        #toast-notification.show {
-            transform: translateY(0px);
-            opacity: 1;
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { border: 4px solid var(--tertiary-bg); border-top: 4px solid var(--accent-color); border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        #toast-notification { transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out; transform: translateY(100%); opacity: 0; }
+        #toast-notification.show { transform: translateY(0px); opacity: 1; }
         .logo-font { font-family: 'Playfair Display', serif; }
-
-        /* Improved select dropdown arrow */
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1em;
-            padding-right: 2.5rem;
-        }
-        
-        /* FIX for browser overriding dark mode styles */
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px var(--tertiary-bg) inset !important;
-            -webkit-text-fill-color: var(--primary-text) !important;
-            transition: background-color 5000s ease-in-out 0s;
-        }
-         input[type="text"], input[type="password"], input[type="number"], select {
-            color-scheme: dark;
-         }
-
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px var(--tertiary-bg) inset !important; -webkit-text-fill-color: var(--primary-text) !important; transition: background-color 5000s ease-in-out 0s; }
+        input[type="text"], input[type="password"], input[type="number"], select { color-scheme: dark; }
     </style>
 </head>
 <body class="zen-scrollbar">
@@ -226,17 +165,17 @@
     </div>
 
     <!-- E-Book Reader Modal -->
-    <div id="ebook-reader-modal" class="fixed inset-0 bg-primary-bg/80 backdrop-blur-md z-40 hidden flex-col">
+    <div id="ebook-reader-modal" class="fixed inset-0 bg-primary-bg/90 backdrop-blur-md z-40 hidden flex-col">
         <div class="flex justify-between items-center p-4 bg-secondary-bg/80 border-b border-border-color/50">
-            <div class="text-white">
-                <h3 id="reader-title" class="font-bold text-lg">Book Title</h3>
-                <p id="reader-author" class="text-sm text-secondary-text">Author</p>
+            <div class="text-white overflow-hidden">
+                <h3 id="reader-title" class="font-bold text-lg truncate">Book Title</h3>
+                <p id="reader-author" class="text-sm text-secondary-text truncate">Author</p>
             </div>
-            <div class="flex items-center space-x-2">
-                 <span class="text-sm hidden sm:inline">Page:</span>
-                 <input type="number" id="reader-page-input" class="bg-tertiary-bg rounded-md w-16 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
-                 <button onclick="APP.savePdfProgress()" class="bg-sky-500 hover:bg-sky-600 px-3 py-1 rounded-md text-sm font-semibold transition-colors">Save</button>
-                 <button onclick="APP.closeReader()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x"></i></button>
+            <div class="flex items-center space-x-3 flex-shrink-0">
+                <span id="reader-progress-status" class="text-sm text-secondary-text transition-opacity duration-500"></span>
+                <span class="text-sm text-secondary-text hidden sm:inline">Page:</span>
+                <input type="number" id="reader-page-input" class="bg-tertiary-bg rounded-md w-20 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
+                <button onclick="APP.closeReader()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x"></i></button>
             </div>
         </div>
         <div id="reader-content" class="flex-grow w-full h-full">
@@ -247,8 +186,8 @@
     <!-- Audiobook Player -->
     <div id="audio-player-container" class="fixed bottom-0 left-0 right-0 bg-secondary-bg/80 backdrop-blur-lg z-30 p-3 shadow-2xl border-t border-border-color/50">
         <div class="max-w-7xl mx-auto flex items-center space-x-3 md:space-x-4">
-            <img id="player-cover" src="https://placehold.co/64x64/1e293b/94a3b8?text=ZenLib" class="w-14 h-14 md:w-16 md:h-16 rounded-lg object-cover shadow-md">
-            <div class="flex-grow">
+            <img id="player-cover" src="https://placehold.co/64x64/1e293b/94a3b8?text=ZenLib" class="w-14 h-14 md:w-16 md:h-16 rounded-lg object-cover shadow-md flex-shrink-0">
+            <div class="flex-grow overflow-hidden">
                 <h4 id="player-title" class="font-semibold text-white truncate">Select an audiobook</h4>
                 <p id="player-author" class="text-sm text-secondary-text truncate">to begin</p>
                 <div class="flex items-center space-x-2 mt-1">
@@ -257,15 +196,23 @@
                     <span id="player-duration" class="text-xs text-secondary-text w-10 text-center">0:00</span>
                 </div>
             </div>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1 sm:space-x-2">
+                <button onclick="APP.PLAYER.skip(-15)" class="p-2 hover:bg-tertiary-bg rounded-full transition-colors hidden sm:block"><i data-lucide="rewind" class="w-5 h-5"></i></button>
                 <button id="player-play-pause-btn" onclick="APP.PLAYER.togglePlayPause()" class="p-3 bg-tertiary-bg/50 hover:bg-tertiary-bg rounded-full transition-colors">
                     <i id="player-play-icon" data-lucide="play" class="w-6 h-6"></i>
                     <i id="player-pause-icon" data-lucide="pause" class="w-6 h-6 hidden"></i>
                 </button>
-                 <button onclick="APP.hidePlayer()" class="p-2 hover:bg-tertiary-bg rounded-full text-secondary-text hidden md:block"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="APP.PLAYER.skip(15)" class="p-2 hover:bg-tertiary-bg rounded-full transition-colors hidden sm:block"><i data-lucide="fast-forward" class="w-5 h-5"></i></button>
+                <div class="relative">
+                     <button id="player-speed-btn" class="p-2 hover:bg-tertiary-bg rounded-full transition-colors w-12 text-sm font-semibold">1x</button>
+                     <div id="player-speed-menu" class="absolute bottom-full mb-2 right-0 bg-tertiary-bg rounded-md shadow-lg hidden flex-col w-20">
+                         <!-- Speeds will be injected here -->
+                     </div>
+                </div>
+                <button onclick="APP.hidePlayer()" class="p-2 hover:bg-tertiary-bg rounded-full text-secondary-text hidden md:block"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
         </div>
-        <audio id="audio-element" ontimeupdate="APP.PLAYER.updateProgress()" onloadedmetadata="APP.PLAYER.onMetadataLoaded()"></audio>
+        <audio id="audio-element" ontimeupdate="APP.PLAYER.updateProgressUI()" onloadedmetadata="APP.PLAYER.onMetadataLoaded()" onended="APP.PLAYER.onEnded()"></audio>
     </div>
 
     <!-- Admin Login Modal -->
@@ -296,7 +243,9 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
+        // =================================================================================
         // --- CONFIGURATION ---
+        // =================================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBL4d9wa8RPjSD2f6lVlpCc9BiTPQ3i_gY",
             authDomain: "zenlib-46846.firebaseapp.com",
@@ -306,17 +255,36 @@
             appId: "1:353115027161:web:b82c03f76e93be68e330c8"
         };
 		
-        const GITHUB_BASE_URL = "https://skyesonlyfans.github.io/ZenLib";
-        // --- END CONFIGURATION ---
+        // --- IMPORTANT: GITHUB URL CONFIGURATION ---
+        // This is the BASE URL where your book files are hosted via GitHub Pages.
+        // 1. Your repo MUST be public and have GitHub Pages enabled.
+        // 2. The URL should look like: https://your-username.github.io/your-repo-name
+        // 3. DO NOT include a trailing slash '/'.
+        // 4. Your book files should be organized inside this repo, e.g., in a /books/ directory.
+        const GITHUB_BASE_URL = "https://your-username.github.io/your-repo-name";
 
+        // --- IMPORTANT: FIRESTORE INDEX REQUIRED ---
+        // This app queries your 'books' collection. To make this work, you need to create
+        // a Firestore Index.
+        // 1. Run the app.
+        // 2. Open the browser's developer console (F12 or Ctrl+Shift+I).
+        // 3. You will see an error message from Firestore that includes a LONG URL.
+        // 4. Click that URL. It will take you directly to the Firebase console with the
+        //    correct index configuration pre-filled.
+        // 5. Click "Create Index". It will take a few minutes to build. Once it's done,
+        //    the library will load correctly.
+        // =================================================================================
+        
 
-        // Firebase Imports
+        // Firebase Imports (upgraded to a more recent version)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // --- GLOBAL APP STATE AND LOGIC ---
         window.APP = {
@@ -325,18 +293,41 @@
                 libraryTab: 'ebooks',
                 books: [],
                 requests: [],
+                progress: {},
+                user: null,
                 isAdmin: false,
                 currentAudiobook: null,
+                readerAutosaveInterval: null,
+                progressSaveTimeout: null,
             },
 
             init() {
                 console.log("ZenLib Initializing...");
-                this.listenForBooks();
-                this.listenForRequests();
+                this.initAuth();
                 this.attachEventListeners();
                 lucide.createIcons();
                 this.updateNav();
                 this.switchLibraryTab('ebooks');
+                this.PLAYER.init();
+            },
+
+            initAuth() {
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("User is signed in anonymously:", user.uid);
+                        this.state.user = user;
+                        // Now that we have a user, fetch their data
+                        this.listenForBooks();
+                        this.listenForRequests();
+                        this.listenForProgress();
+                    } else {
+                        console.log("No user, signing in anonymously...");
+                        signInAnonymously(auth).catch((error) => {
+                            console.error("Anonymous sign-in failed:", error);
+                            this.showToast("Authentication failed. Please refresh.", true);
+                        });
+                    }
+                });
             },
 
             showToast(message, isError = false) {
@@ -345,13 +336,9 @@
                 const toastIcon = document.getElementById('toast-icon');
                 
                 toastMessage.textContent = message;
-                if(isError) {
-                    toast.style.backgroundColor = '#ef4444'; // red-500
-                    toastIcon.setAttribute('data-lucide', 'alert-circle');
-                } else {
-                    toast.style.backgroundColor = '#22c55e'; // green-500
-                    toastIcon.setAttribute('data-lucide', 'check-circle');
-                }
+                toast.style.backgroundColor = isError ? '#ef4444' : '#22c55e';
+                toastIcon.setAttribute('data-lucide', isError ? 'alert-circle' : 'check-circle');
+                
                 lucide.createIcons();
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 3000);
@@ -363,9 +350,9 @@
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                 const activeView = document.getElementById(`${view}-view`);
                 activeView.classList.add('active');
-                activeView.classList.remove('animate-fade-in'); // Reset animation
-                void activeView.offsetWidth; // Trigger reflow
-                activeView.classList.add('animate-fade-in'); // Re-add animation class
+                activeView.classList.remove('animate-fade-in');
+                void activeView.offsetWidth; 
+                activeView.classList.add('animate-fade-in');
                 window.scrollTo(0, 0);
                 this.updateNav();
             },
@@ -384,22 +371,13 @@
                 this.state.libraryTab = tab;
                 const ebooksTab = document.getElementById('ebooks-tab');
                 const audiobooksTab = document.getElementById('audiobooks-tab');
-
-                const setActive = (el) => {
-                    el.classList.add('bg-accent-color', 'text-white');
-                    el.classList.remove('text-secondary-text', 'hover:bg-tertiary-bg');
-                };
-                const setInactive = (el) => {
-                    el.classList.remove('bg-accent-color', 'text-white');
-                    el.classList.add('text-secondary-text', 'hover:bg-tertiary-bg');
-                };
+                const setActive = (el) => el.classList.add('bg-accent-color', 'text-white');
+                const setInactive = (el) => el.classList.remove('bg-accent-color', 'text-white');
                 
                 if (tab === 'ebooks') {
-                    setActive(ebooksTab);
-                    setInactive(audiobooksTab);
+                    setActive(ebooksTab); setInactive(audiobooksTab);
                 } else {
-                    setActive(audiobooksTab);
-                    setInactive(ebooksTab);
+                    setActive(audiobooksTab); setInactive(ebooksTab);
                 }
                 this.renderBooks();
             },
@@ -415,7 +393,7 @@
                     console.error("Error listening for books: ", error);
                      if (error.code === 'failed-precondition') {
                          this.showToast("Database requires an index. See console.", true);
-                         console.log("This query requires a Firestore index. Please create it. The link to create it should be in the error message below this log.");
+                         console.log("CRITICAL: This query requires a Firestore index. Please create it. The link to create it should be in the detailed error message in your console.");
                     } else {
                         this.showToast("Could not fetch library.", true);
                     }
@@ -429,7 +407,7 @@
                 const filteredBooks = this.state.books.filter(b => b.type === this.state.libraryTab);
                 
                 if (filteredBooks.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-center text-secondary-text mt-8">Uh oh, request some books and check back later!</p>`;
+                    grid.innerHTML = `<p class="col-span-full text-center text-secondary-text mt-8">No ${this.state.libraryTab} found. Request some!</p>`;
                     return;
                 }
 
@@ -439,7 +417,7 @@
                     card.className = 'cursor-pointer group relative';
                     card.innerHTML = `
                         <div class="relative overflow-hidden rounded-lg shadow-lg">
-                            <img src="${book.coverUrl}" alt="${book.title}" class="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null;this.src='https://placehold.co/400x600/1e293b/94a3b8?text=Cover+Not+Found';">
+                            <img src="${book.coverUrl}" alt="${book.title}" class="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null;this.src='https://placehold.co/400x600/1e293b/94a3b8?text=Cover+Not+Found'; console.error('Failed to load cover from URL:', this.src);">
                             <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all"></div>
                             ${progress ? `<div class="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-500/50 rounded-b-lg"><div class="h-1.5 bg-accent-color rounded-b-lg" style="width: ${progress.percentage || 0}%"></div></div>` : ''}
                         </div>
@@ -459,14 +437,30 @@
                 }
             },
             
-            // --- PROGRESS TRACKING ---
-            saveProgress(bookId, progressData) {
-                 localStorage.setItem(`zenlib_progress_${bookId}`, JSON.stringify(progressData));
+            // --- PROGRESS TRACKING (FIRESTORE-BASED) ---
+            listenForProgress() {
+                if (!this.state.user) return;
+                const progressCol = collection(db, "users", this.state.user.uid, "progress");
+                onSnapshot(progressCol, (snapshot) => {
+                    snapshot.docs.forEach(doc => {
+                        this.state.progress[doc.id] = doc.data();
+                    });
+                    this.renderBooks(); // Re-render books with updated progress
+                });
+            },
+
+            async saveProgress(bookId, progressData) {
+                 if (!this.state.user || !bookId) return;
+                 const progressDocRef = doc(db, "users", this.state.user.uid, "progress", bookId);
+                 try {
+                     await setDoc(progressDocRef, progressData, { merge: true });
+                 } catch (error) {
+                     console.error("Failed to save progress:", error);
+                 }
             },
 
             getProgress(bookId) {
-                const data = localStorage.getItem(`zenlib_progress_${bookId}`);
-                return data ? JSON.parse(data) : null;
+                return this.state.progress[bookId] || null;
             },
 
             // --- E-BOOK READER ---
@@ -477,26 +471,38 @@
                 modal.dataset.bookId = book.id;
 
                 const progress = this.getProgress(book.id);
-                document.getElementById('reader-page-input').value = progress?.page || 1;
+                const page = progress?.page || 1;
+                document.getElementById('reader-page-input').value = page;
                 
-                const url = `${book.fileUrl}#page=${progress?.page || 1}&toolbar=0&navpanes=0`;
+                const url = `${book.fileUrl}#page=${page}&toolbar=0&navpanes=0`;
                 document.getElementById('reader-content').innerHTML = `<iframe src="${url}" class="w-full h-full border-0"></iframe>`;
                 
                 modal.style.display = 'flex';
+
+                this.state.readerAutosaveInterval = setInterval(() => this.savePdfProgress(), 5000);
             },
 
             closeReader() {
+                 if (this.state.readerAutosaveInterval) {
+                     clearInterval(this.state.readerAutosaveInterval);
+                     this.state.readerAutosaveInterval = null;
+                 }
+                 this.savePdfProgress(); // Save one last time on close
                  document.getElementById('ebook-reader-modal').style.display = 'none';
                  document.getElementById('reader-content').innerHTML = '';
             },
 
             savePdfProgress() {
                 const bookId = document.getElementById('ebook-reader-modal').dataset.bookId;
-                const page = document.getElementById('reader-page-input').value;
-                if(bookId && page) {
+                const pageInput = document.getElementById('reader-page-input');
+                const page = pageInput.value;
+                if(bookId && page && this.state.user) {
                     this.saveProgress(bookId, { page: parseInt(page) });
-                    this.showToast("Progress saved!");
-                    this.renderBooks();
+                    
+                    const statusEl = document.getElementById('reader-progress-status');
+                    statusEl.textContent = 'Saved!';
+                    statusEl.style.opacity = 1;
+                    setTimeout(() => { statusEl.style.opacity = 0; }, 2000);
                 }
             },
 
@@ -538,8 +544,7 @@
                 e.preventDefault();
                 const title = document.getElementById('request-title').value;
                 if (!title) {
-                    this.showToast("Title is required for requests.", true);
-                    return;
+                    this.showToast("Title is required for requests.", true); return;
                 }
                 const requestData = {
                     title,
@@ -560,11 +565,8 @@
             
             // --- ADMIN & UPLOADS ---
             openAdminLogin() {
-                if (this.state.isAdmin) {
-                    this.navigateTo('admin');
-                } else {
-                    document.getElementById('admin-login-modal').style.display = 'flex';
-                }
+                if (this.state.isAdmin) this.navigateTo('admin');
+                else document.getElementById('admin-login-modal').style.display = 'flex';
             },
             
             closeAdminLogin() {
@@ -576,7 +578,7 @@
                 e.preventDefault();
                 const user = document.getElementById('admin-user').value;
                 const pass = document.getElementById('admin-pass').value;
-                // This is not secure for a real application, but works for this personal project.
+                // THIS IS NOT SECURE. For a personal project, it's okay.
                 if (user === 'skye' && pass === '639411') {
                     this.state.isAdmin = true;
                     this.closeAdminLogin();
@@ -592,39 +594,23 @@
                 const title = document.getElementById('upload-title').value;
                 const author = document.getElementById('upload-author').value;
                 const type = document.getElementById('upload-type').value;
-                const folderName = document.getElementById('upload-folder').value;
-                const coverFilename = document.getElementById('upload-cover-filename').value;
-                const bookFilename = document.getElementById('upload-book-filename').value;
-                
+                const folderName = document.getElementById('upload-folder').value.trim();
+                const coverFilename = document.getElementById('upload-cover-filename').value.trim();
+                const bookFilename = document.getElementById('upload-book-filename').value.trim();
                 const statusEl = document.getElementById('upload-status');
-
                 if (!title || !author || !type || !folderName || !coverFilename || !bookFilename) {
-                    this.showToast("All fields are required.", true);
-                    return;
+                    this.showToast("All fields are required.", true); return;
                 }
-                
                 statusEl.textContent = 'Registering book...';
-
-                // Construct the URLs based on the GitHub repo structure.
                 const basePath = `${GITHUB_BASE_URL}/books/${type}s/${folderName}`;
                 const coverUrl = `${basePath}/${coverFilename}`;
                 const fileUrl = `${basePath}/${bookFilename}`;
-
                 try {
-                    await addDoc(collection(db, "books"), {
-                        title,
-                        author,
-                        type,
-                        coverUrl,
-                        fileUrl,
-                        createdAt: serverTimestamp()
-                    });
-                    
+                    await addDoc(collection(db, "books"), { title, author, type, coverUrl, fileUrl, createdAt: serverTimestamp() });
                     statusEl.textContent = '';
                     this.showToast('Book registered successfully!');
                     document.getElementById('upload-form').reset();
                     this.navigateTo('library');
-
                 } catch (err) {
                     console.error("Registration failed: ", err);
                     this.showToast("Registration failed. Check console.", true);
@@ -634,17 +620,29 @@
             
              // --- AUDIO PLAYER ---
             hidePlayer() {
-                const player = document.getElementById('audio-player-container');
-                player.classList.remove('active');
+                document.getElementById('audio-player-container').classList.remove('active');
             },
             
             showPlayer() {
-                const player = document.getElementById('audio-player-container');
-                player.classList.add('active');
+                document.getElementById('audio-player-container').classList.add('active');
             },
 
             PLAYER: {
-                audio: document.getElementById('audio-element'),
+                audio: null,
+                speeds: [0.75, 1, 1.25, 1.5, 1.75, 2],
+                currentSpeedIndex: 1, // Index for 1x speed
+
+                init() {
+                    this.audio = document.getElementById('audio-element');
+                    const speedMenu = document.getElementById('player-speed-menu');
+                    this.speeds.forEach((speed, index) => {
+                        const speedBtn = document.createElement('button');
+                        speedBtn.className = 'py-2 px-4 hover:bg-border-color transition-colors text-sm';
+                        speedBtn.textContent = `${speed}x`;
+                        speedBtn.onclick = () => this.changeSpeed(index);
+                        speedMenu.appendChild(speedBtn);
+                    });
+                },
                 
                 playAudiobook(book) {
                     window.APP.state.currentAudiobook = book;
@@ -653,14 +651,17 @@
                     document.getElementById('player-title').textContent = book.title;
                     document.getElementById('player-author').textContent = book.author;
                     
-                    const progress = window.APP.getProgress(book.id);
-                    if (progress && progress.time) {
-                        this.audio.currentTime = progress.time;
-                    }
-                    
-                    this.audio.play();
-                    this.updatePlayPauseIcon(true);
-                    window.APP.showPlayer();
+                    this.audio.play().then(() => {
+                        const progress = window.APP.getProgress(book.id);
+                        if (progress && progress.time) {
+                            this.audio.currentTime = progress.time;
+                        }
+                        this.updatePlayPauseIcon(true);
+                        window.APP.showPlayer();
+                    }).catch(err => {
+                        console.error("Audio play failed:", err);
+                        window.APP.showToast("Could not play audio.", true);
+                    });
                 },
 
                 togglePlayPause() {
@@ -691,27 +692,50 @@
                     document.getElementById('player-progress').max = this.audio.duration;
                 },
 
-                updateProgress() {
+                updateProgressUI() {
                     if (!this.audio.duration) return;
                     const currentTime = this.audio.currentTime;
-                    const duration = this.audio.duration;
-                    
                     document.getElementById('player-current-time').textContent = this.formatTime(currentTime);
                     document.getElementById('player-progress').value = currentTime;
                     
-                    if (window.APP.state.currentAudiobook) {
-                        const bookId = window.APP.state.currentAudiobook.id;
-                        const percentage = (currentTime / duration) * 100;
-                        
-                        // Save progress every 5 seconds, avoiding saving at time 0
-                        if (Math.floor(currentTime) > 0 && Math.floor(currentTime) % 5 === 0) {
-                            window.APP.saveProgress(bookId, { time: currentTime, percentage: percentage });
+                    // Debounce saving progress to avoid spamming Firestore
+                    clearTimeout(window.APP.state.progressSaveTimeout);
+                    window.APP.state.progressSaveTimeout = setTimeout(() => {
+                         if (window.APP.state.currentAudiobook) {
+                            const bookId = window.APP.state.currentAudiobook.id;
+                            const percentage = (this.audio.currentTime / this.audio.duration) * 100;
+                            window.APP.saveProgress(bookId, { time: this.audio.currentTime, percentage });
                         }
+                    }, 1000);
+                },
+
+                onEnded() {
+                    this.updatePlayPauseIcon(false);
+                     if (window.APP.state.currentAudiobook) {
+                        const bookId = window.APP.state.currentAudiobook.id;
+                        window.APP.saveProgress(bookId, { time: this.audio.duration, percentage: 100 });
                     }
                 },
                 
                 seek() {
                     this.audio.currentTime = document.getElementById('player-progress').value;
+                },
+
+                skip(seconds) {
+                    if (!window.APP.state.currentAudiobook) return;
+                    this.audio.currentTime += seconds;
+                },
+                
+                changeSpeed(index) {
+                    this.currentSpeedIndex = index;
+                    const newRate = this.speeds[this.currentSpeedIndex];
+                    this.audio.playbackRate = newRate;
+                    document.getElementById('player-speed-btn').textContent = `${newRate}x`;
+                    document.getElementById('player-speed-menu').classList.add('hidden');
+                },
+
+                toggleSpeedMenu() {
+                    document.getElementById('player-speed-menu').classList.toggle('hidden');
                 }
             },
             
@@ -721,6 +745,13 @@
                 document.getElementById('admin-login-form').addEventListener('submit', (e) => this.handleAdminLogin(e));
                 document.getElementById('upload-form').addEventListener('submit', (e) => this.handleUploadSubmit(e));
                 document.getElementById('player-progress').addEventListener('input', () => this.PLAYER.seek());
+                document.getElementById('player-speed-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.PLAYER.toggleSpeedMenu();
+                });
+                document.body.addEventListener('click', () => {
+                     document.getElementById('player-speed-menu').classList.add('hidden');
+                });
             }
         };
 
@@ -734,7 +765,7 @@
                 document.getElementById('main-content').innerHTML = `
                 <div class="text-center p-10 bg-red-900/50 border border-red-500 rounded-lg max-w-2xl mx-auto">
                     <h2 class="text-3xl font-bold text-red-300">Configuration Needed</h2>
-                    <p class="mt-4 text-red-200">Welcome to ZenLib! To get started, please configure your Firebase and your GitHub Base URL in the script tag at the bottom of the HTML file.</p>
+                    <p class="mt-4 text-red-200">Welcome to ZenLib! To get started, please configure your Firebase credentials and your GitHub Base URL in the script tag at the bottom of this HTML file.</p>
                 </div>
                 `;
             }
@@ -743,4 +774,3 @@
     </script>
 </body>
 </html>
-
