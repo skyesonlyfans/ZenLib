@@ -2,7 +2,8 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- MODIFIED: Disabled user scaling to prevent double-tap to zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ZenLib by Skye &lt;3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -52,12 +53,12 @@
         input[type="text"], input[type="password"], input[type="number"], select { color-scheme: dark; }
         
         /* EPUB Reader Styles */
-        #epub-viewer {
-            height: 100%;
-            width: 100%;
-            background-color: #fff; /* Set a background for the book pages */
-            color: #000;
-        }
+        #epub-viewer { height: 100%; width: 100%; background-color: #fff; color: #000; }
+        #reader-toc-menu.active { transform: translateX(0); }
+        #reader-toc-overlay.active { display: block; }
+        #reader-toc-list a { display: block; padding: 10px 12px; border-radius: 6px; transition: background-color 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        #reader-toc-list a:hover { background-color: var(--tertiary-bg); }
+        #reader-toc-list .sub-item a { padding-left: 28px; }
     </style>
 </head>
 <body class="zen-scrollbar">
@@ -182,30 +183,52 @@
     <!-- E-Book Reader Modal -->
     <div id="ebook-reader-modal" class="fixed inset-0 bg-primary-bg/90 backdrop-blur-md z-40 hidden flex-col">
         <div class="flex justify-between items-center p-4 bg-secondary-bg/80 border-b border-border-color/50 flex-shrink-0">
-            <div class="text-white overflow-hidden">
-                <h3 id="reader-title" class="font-bold text-lg truncate">Book Title</h3>
-                <p id="reader-author" class="text-sm text-secondary-text truncate">Author</p>
+            <!-- Left side: TOC and Title -->
+            <div class="flex items-center space-x-3 text-white overflow-hidden flex-1">
+                <button id="reader-toc-btn" onclick="APP.toggleToc()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors hidden flex-shrink-0"><i data-lucide="menu" class="w-5 h-5"></i></button>
+                <div class="overflow-hidden">
+                    <h3 id="reader-title" class="font-bold text-lg truncate">Book Title</h3>
+                    <p id="reader-author" class="text-sm text-secondary-text truncate">Author</p>
+                </div>
             </div>
+            <!-- Right side: Controls -->
             <div class="flex items-center space-x-2 flex-shrink-0">
-                <!-- MODIFIED: Page turn controls moved here -->
-                <div id="epub-controls" class="hidden items-center space-x-1">
+                <!-- EPUB controls -->
+                <div id="epub-controls" class="hidden items-center space-x-2">
                     <button id="prev-page" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+                    <form id="reader-page-form" class="flex items-center text-sm text-white">
+                        <input type="number" id="reader-page-input-epub" class="bg-tertiary-bg rounded-md w-14 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color" min="1">
+                        <span class="px-1.5 text-secondary-text">/</span>
+                        <span id="reader-total-pages" class="w-12 text-left">...</span>
+                    </form>
                     <button id="next-page" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
                 </div>
+                <!-- PDF controls -->
                 <div id="pdf-controls" class="hidden items-center space-x-3">
                     <span class="text-sm text-secondary-text hidden sm:inline">Page:</span>
-                    <input type="number" id="reader-page-input" class="bg-tertiary-bg rounded-md w-20 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
+                    <input type="number" id="reader-page-input-pdf" class="bg-tertiary-bg rounded-md w-20 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
                 </div>
+                <!-- Common controls -->
                 <button onclick="APP.closeReader()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
         </div>
-        <div id="reader-content" class="flex-grow w-full h-full relative">
+        <div id="reader-content" class="flex-grow w-full h-full relative overflow-hidden">
+             <!-- TOC menu -->
+            <div id="reader-toc-menu" class="absolute top-0 left-0 h-full w-full max-w-xs bg-secondary-bg z-30 shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+                <div class="p-4 flex justify-between items-center border-b border-border-color/50 flex-shrink-0">
+                    <h4 class="font-bold text-lg">Contents</h4>
+                    <button onclick="APP.toggleToc()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <ul id="reader-toc-list" class="p-2 overflow-y-auto flex-grow zen-scrollbar">
+                    <!-- TOC items will be injected here -->
+                </ul>
+            </div>
+            <div id="reader-toc-overlay" onclick="APP.toggleToc()" class="absolute inset-0 bg-black/50 z-20 hidden"></div>
+            <!-- Main content -->
             <div id="reader-loader" class="absolute inset-0 flex justify-center items-center bg-primary-bg/50 z-10 hidden">
                 <div class="loader"></div>
             </div>
-            <!-- Reader content (EPUB or PDF) will be injected here -->
             <div id="epub-viewer" class="w-full h-full"></div>
-            <!-- REMOVED: Old nav buttons were here -->
         </div>
     </div>
     
@@ -455,7 +478,7 @@
 
             // --- E-BOOK READER ---
             openReader(book) {
-                document.body.classList.add('reader-active'); // Lock body scroll
+                document.body.classList.add('reader-active');
                 const modal = document.getElementById('ebook-reader-modal');
                 const readerLoader = document.getElementById('reader-loader');
                 document.getElementById('reader-title').textContent = book.title;
@@ -466,49 +489,102 @@
 
                 const isEpub = book.fileUrl.endsWith('.epub');
                 document.getElementById('epub-controls').style.display = isEpub ? 'flex' : 'none';
+                document.getElementById('reader-toc-btn').style.display = isEpub ? 'block' : 'none';
                 document.getElementById('pdf-controls').style.display = isEpub ? 'none' : 'flex';
                 const viewer = document.getElementById('epub-viewer');
-                viewer.innerHTML = ''; // Clear previous content
+                viewer.innerHTML = '';
+                document.getElementById('reader-toc-list').innerHTML = '';
 
                 if (isEpub) {
-                    this.state.currentEpub = ePub(book.fileUrl);
-                    this.state.currentEpubRendition = this.state.currentEpub.renderTo(viewer, {
-                        width: "100%", height: "100%", allowScriptedContent: true
-                    });
-                    
-                    const progress = this.getProgress(book.id);
-                    this.state.currentEpubRendition.display(progress?.location);
-                    
-                    this.state.currentEpubRendition.on("relocated", (location) => {
-                        this.saveProgress(book.id, { location: location.start.cfi, percentage: (this.state.currentEpub.locations.percentageFromCfi(location.start.cfi) * 100) });
-                    });
-                    
-                    this.state.currentEpub.ready.then(() => {
-                         readerLoader.style.display = 'none';
-                    });
-
+                    this.setupEpubReader(book);
                 } else { // Handle PDFs
                     const progress = this.getProgress(book.id);
                     const page = progress?.page || 1;
-                    document.getElementById('reader-page-input').value = page;
+                    document.getElementById('reader-page-input-pdf').value = page;
                     viewer.innerHTML = `<iframe src="${book.fileUrl}#page=${page}&toolbar=0&navpanes=0" class="w-full h-full border-0"></iframe>`;
                     readerLoader.style.display = 'none';
                 }
             },
 
+            async setupEpubReader(book) {
+                const readerLoader = document.getElementById('reader-loader');
+                const viewer = document.getElementById('epub-viewer');
+                
+                this.state.currentEpub = ePub(book.fileUrl);
+                this.state.currentEpubRendition = this.state.currentEpub.renderTo(viewer, {
+                    width: "100%", height: "100%", allowScriptedContent: true
+                });
+                
+                const progress = this.getProgress(book.id);
+                this.state.currentEpubRendition.display(progress?.location);
+                
+                this.state.currentEpubRendition.on("relocated", (location) => {
+                    this.saveProgress(book.id, { location: location.start.cfi, percentage: (this.state.currentEpub.locations.percentageFromCfi(location.start.cfi) * 100) });
+                    this.updateEpubPageNumber(location);
+                });
+                
+                await this.state.currentEpub.ready;
+                await this.state.currentEpub.locations.generate(1650); // Generate page locations
+                
+                document.getElementById('reader-total-pages').textContent = this.state.currentEpub.locations.total;
+                document.getElementById('reader-page-input-epub').max = this.state.currentEpub.locations.total;
+                this.renderTableOfContents(this.state.currentEpub.navigation.toc);
+                
+                // Update page number for initial location
+                const initialLocation = this.state.currentEpubRendition.currentLocation();
+                this.updateEpubPageNumber(initialLocation);
+
+                readerLoader.style.display = 'none';
+            },
+            
+            updateEpubPageNumber(location) {
+                if (this.state.currentEpub?.locations) {
+                    const currentPage = this.state.currentEpub.locations.locationFromCfi(location.start.cfi);
+                    document.getElementById('reader-page-input-epub').value = currentPage;
+                }
+            },
+            
+            renderTableOfContents(toc, parentElement = document.getElementById('reader-toc-list')) {
+                toc.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="${item.href}">${item.label.trim()}</a>`;
+                    li.querySelector('a').onclick = (e) => {
+                        e.preventDefault();
+                        this.state.currentEpubRendition.display(item.href);
+                        this.toggleToc();
+                    };
+                    parentElement.appendChild(li);
+                    if (item.subitems && item.subitems.length > 0) {
+                        const sublist = document.createElement('ul');
+                        sublist.className = 'sub-item';
+                        li.appendChild(sublist);
+                        this.renderTableOfContents(item.subitems, sublist);
+                    }
+                });
+            },
+
+            toggleToc() {
+                document.getElementById('reader-toc-menu').classList.toggle('active');
+                document.getElementById('reader-toc-overlay').classList.toggle('active');
+            },
+
             closeReader() {
-                 document.body.classList.remove('reader-active'); // Unlock body scroll
+                 document.body.classList.remove('reader-active');
                  const bookId = document.getElementById('ebook-reader-modal').dataset.bookId;
                  if (this.state.currentEpub) {
                     this.state.currentEpub.destroy();
                     this.state.currentEpub = null;
                     this.state.currentEpubRendition = null;
                  } else {
-                    const page = document.getElementById('reader-page-input').value;
+                    const page = document.getElementById('reader-page-input-pdf').value;
                     if (bookId && page) this.saveProgress(bookId, { page: parseInt(page) });
                  }
                  document.getElementById('ebook-reader-modal').style.display = 'none';
                  document.getElementById('epub-viewer').innerHTML = '';
+                 
+                 // Close TOC if it was open
+                 document.getElementById('reader-toc-menu').classList.remove('active');
+                 document.getElementById('reader-toc-overlay').classList.remove('active');
             },
             
             // --- REQUESTS ---
@@ -577,9 +653,6 @@
                 const user = document.getElementById('admin-user').value;
                 const pass = document.getElementById('admin-pass').value;
                 // SECURITY WARNING: This is NOT a secure way to handle authentication.
-                // The credentials are hardcoded directly in the client-side code,
-                // making them easily accessible to anyone who inspects the page source.
-                // For a real application, use a secure authentication method like Firebase Auth.
                 if (user === 'skye' && pass === '639411') {
                     this.state.isAdmin = true;
                     this.closeAdminLogin();
@@ -702,9 +775,17 @@
                 document.getElementById('player-speed-btn').addEventListener('click', (e) => { e.stopPropagation(); this.PLAYER.toggleSpeedMenu(); });
                 document.body.addEventListener('click', () => document.getElementById('player-speed-menu').classList.add('hidden'));
 
-                // Reader navigation (click for desktop)
+                // Reader navigation
                 document.getElementById('prev-page').addEventListener('click', () => this.state.currentEpubRendition?.prev());
                 document.getElementById('next-page').addEventListener('click', () => this.state.currentEpubRendition?.next());
+                document.getElementById('reader-page-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (this.state.currentEpubRendition) {
+                        const pageNum = document.getElementById('reader-page-input-epub').value;
+                        const cfi = this.state.currentEpub.locations.cfiFromLocation(pageNum - 1);
+                        this.state.currentEpubRendition.display(cfi);
+                    }
+                });
             }
         };
 
