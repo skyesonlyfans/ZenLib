@@ -2,8 +2,8 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <!-- MODIFIED: Disabled user scaling to prevent double-tap to zoom -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- OPTIMIZATION: Added maximum-scale=1.0 to robustly disable double-tap to zoom on iOS devices. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZenLib by Skye &lt;3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -48,7 +48,7 @@
         #toast-notification { transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out; transform: translateY(100%); opacity: 0; }
         #toast-notification.show { transform: translateY(0px); opacity: 1; }
         .logo-font { font-family: 'Playfair Display', serif; }
-        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24' 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
         input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px var(--tertiary-bg) inset !important; -webkit-text-fill-color: var(--primary-text) !important; transition: background-color 5000s ease-in-out 0s; }
         input[type="text"], input[type="password"], input[type="number"], select { color-scheme: dark; }
         
@@ -494,6 +494,9 @@
                 const viewer = document.getElementById('epub-viewer');
                 viewer.innerHTML = '';
                 document.getElementById('reader-toc-list').innerHTML = '';
+                 // Reset page numbers
+                document.getElementById('reader-page-input-epub').value = '';
+                document.getElementById('reader-total-pages').textContent = '...';
 
                 if (isEpub) {
                     this.setupEpubReader(book);
@@ -506,6 +509,9 @@
                 }
             },
 
+            // OPTIMIZATION: Refactored this function to be asynchronous and non-blocking.
+            // The book content is displayed IMMEDIATELY, and then page locations are
+            // generated in the background. This dramatically improves perceived load time.
             async setupEpubReader(book) {
                 const readerLoader = document.getElementById('reader-loader');
                 const viewer = document.getElementById('epub-viewer');
@@ -516,31 +522,54 @@
                 });
                 
                 const progress = this.getProgress(book.id);
+                // Display the book immediately. The user can start reading now.
                 this.state.currentEpubRendition.display(progress?.location);
                 
+                // Once displayed, we can hide the main loader.
+                readerLoader.style.display = 'none';
+
                 this.state.currentEpubRendition.on("relocated", (location) => {
-                    this.saveProgress(book.id, { location: location.start.cfi, percentage: (this.state.currentEpub.locations.percentageFromCfi(location.start.cfi) * 100) });
-                    this.updateEpubPageNumber(location);
+                    const cfi = location.start.cfi;
+                    let percentage = 0;
+                    // Check if locations are ready before calculating percentage
+                    if (this.state.currentEpub.locations.total > 0) {
+                        percentage = this.state.currentEpub.locations.percentageFromCfi(cfi) * 100;
+                        this.updateEpubPageNumber(location);
+                    }
+                    this.saveProgress(book.id, { location: cfi, percentage: percentage });
                 });
                 
-                await this.state.currentEpub.ready;
-                await this.state.currentEpub.locations.generate(1650); // Generate page locations
-                
-                document.getElementById('reader-total-pages').textContent = this.state.currentEpub.locations.total;
-                document.getElementById('reader-page-input-epub').max = this.state.currentEpub.locations.total;
-                this.renderTableOfContents(this.state.currentEpub.navigation.toc);
-                
-                // Update page number for initial location
-                const initialLocation = this.state.currentEpubRendition.currentLocation();
-                this.updateEpubPageNumber(initialLocation);
+                // Now, process the rest of the book (TOC, page locations) in the background.
+                try {
+                    await this.state.currentEpub.ready;
+                    this.renderTableOfContents(this.state.currentEpub.navigation.toc);
 
-                readerLoader.style.display = 'none';
+                    // Generate locations without blocking the UI thread.
+                    // This is the key performance improvement.
+                    this.state.currentEpub.locations.generate(1650).then(() => {
+                        console.log('EPUB locations generated:', this.state.currentEpub.locations.total);
+                        // Now that locations are ready, update the UI.
+                        document.getElementById('reader-total-pages').textContent = this.state.currentEpub.locations.total;
+                        document.getElementById('reader-page-input-epub').max = this.state.currentEpub.locations.total;
+                        
+                        // Update the page number for the currently displayed location.
+                        const currentLocation = this.state.currentEpubRendition.currentLocation();
+                        if(currentLocation) {
+                            this.updateEpubPageNumber(currentLocation);
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error loading EPUB metadata:", error);
+                    this.showToast("Could not load book details.", true);
+                }
             },
             
             updateEpubPageNumber(location) {
                 if (this.state.currentEpub?.locations) {
                     const currentPage = this.state.currentEpub.locations.locationFromCfi(location.start.cfi);
-                    document.getElementById('reader-page-input-epub').value = currentPage;
+                    if (currentPage !== null) {
+                         document.getElementById('reader-page-input-epub').value = currentPage;
+                    }
                 }
             },
             
@@ -780,10 +809,12 @@
                 document.getElementById('next-page').addEventListener('click', () => this.state.currentEpubRendition?.next());
                 document.getElementById('reader-page-form').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    if (this.state.currentEpubRendition) {
+                    if (this.state.currentEpubRendition && this.state.currentEpub.locations.total > 0) {
                         const pageNum = document.getElementById('reader-page-input-epub').value;
                         const cfi = this.state.currentEpub.locations.cfiFromLocation(pageNum - 1);
-                        this.state.currentEpubRendition.display(cfi);
+                        if (cfi) {
+                            this.state.currentEpubRendition.display(cfi);
+                        }
                     }
                 });
             }
@@ -806,4 +837,3 @@
     </script>
 </body>
 </html>
-
