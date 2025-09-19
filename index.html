@@ -404,7 +404,9 @@
             renderBooks() {
                 const grid = document.getElementById('library-grid');
                 grid.innerHTML = '';
-                const filteredBooks = this.state.books.filter(b => b.type === this.state.libraryTab);
+                // FIX: Use the singular form of the tab name for filtering
+                const singularType = this.state.libraryTab.slice(0, -1);
+                const filteredBooks = this.state.books.filter(b => b.type === singularType);
                 
                 if (filteredBooks.length === 0) {
                     grid.innerHTML = `<p class="col-span-full text-center text-secondary-text mt-8">No ${this.state.libraryTab} found. Request some!</p>`;
