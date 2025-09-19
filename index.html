@@ -6,6 +6,9 @@
     <title>ZenLib by Skye &lt;3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- New E-book reader library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -43,6 +46,22 @@
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
         input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px var(--tertiary-bg) inset !important; -webkit-text-fill-color: var(--primary-text) !important; transition: background-color 5000s ease-in-out 0s; }
         input[type="text"], input[type="password"], input[type="number"], select { color-scheme: dark; }
+        
+        /* EPUB Reader Styles */
+        #epub-viewer {
+            height: 100%;
+            width: 100%;
+            background-color: #fff; /* Set a background for the book pages */
+            color: #000;
+        }
+        #ebook-reader-modal .epubjs-arrow {
+            font-size: 40px;
+            background: rgba(0,0,0,0.2);
+            color: white;
+            padding: 0 10px;
+            line-height: 1;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body class="zen-scrollbar">
@@ -123,7 +142,7 @@
                     <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">Admin Panel</h2>
                      <form id="upload-form" class="bg-secondary-bg p-6 rounded-xl shadow-lg border border-border-color/50">
                         <h3 class="text-xl font-semibold mb-4">Register New Book</h3>
-                        <p class="text-sm text-secondary-text mb-4">Upload files to your GitHub repo first, then register the paths here. The suggested structure is <code class="bg-tertiary-bg text-xs p-1 rounded">/books/ebooks/[Folder Name]/file.pdf</code>.</p>
+                        <p class="text-sm text-secondary-text mb-4">EPUB is the preferred format for e-books. The suggested structure is <code class="bg-tertiary-bg text-xs p-1 rounded">/books/ebooks/[Folder Name]/file.epub</code>.</p>
                         <div class="space-y-4">
                             <div>
                                 <label for="upload-title" class="block mb-1.5 text-sm font-medium text-secondary-text">Title <span class="text-red-400">*</span></label>
@@ -138,7 +157,7 @@
                                      <label for="upload-type" class="block mb-1.5 text-sm font-medium text-secondary-text">Type <span class="text-red-400">*</span></label>
                                      <select id="upload-type" required class="bg-tertiary-bg p-3 rounded-lg w-full text-primary-text focus:outline-none focus:ring-2 focus:ring-accent-color">
                                          <option value="" disabled selected>Select book type...</option>
-                                         <option value="ebook">E-Book (pdf, epub, mobi)</option>
+                                         <option value="ebook">E-Book (epub, pdf)</option>
                                          <option value="audiobook">Audiobook (mp3, m4a, m4b)</option>
                                      </select>
                                 </div>
@@ -152,8 +171,8 @@
                                  <input type="text" id="upload-cover-filename" placeholder="e.g. cover.jpg or The_Shining.png" required class="bg-tertiary-bg p-3 rounded-lg w-full placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-color">
                              </div>
                              <div>
-                                 <label for="upload-book-filename" class="block mb-1.5 text-sm font-medium text-secondary-text">Book/Audio Filename <span class="text-red-400">*</span></label>
-                                 <input type="text" id="upload-book-filename" placeholder="e.g. The_Shining.pdf or chapter1.mp3" required class="bg-tertiary-bg p-3 rounded-lg w-full placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-color">
+                                 <label for="upload-book-filename" class="block mb-1.5 text-sm font-medium text-secondary-text">Book/Audio Filename (with extension) <span class="text-red-400">*</span></label>
+                                 <input type="text" id="upload-book-filename" placeholder="e.g. The_Shining.epub or chapter1.mp3" required class="bg-tertiary-bg p-3 rounded-lg w-full placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-color">
                              </div>
                         </div>
                          <button type="submit" class="w-full mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-md hover:shadow-lg">Register Book</button>
@@ -166,20 +185,29 @@
 
     <!-- E-Book Reader Modal -->
     <div id="ebook-reader-modal" class="fixed inset-0 bg-primary-bg/90 backdrop-blur-md z-40 hidden flex-col">
-        <div class="flex justify-between items-center p-4 bg-secondary-bg/80 border-b border-border-color/50">
+        <div class="flex justify-between items-center p-4 bg-secondary-bg/80 border-b border-border-color/50 flex-shrink-0">
             <div class="text-white overflow-hidden">
                 <h3 id="reader-title" class="font-bold text-lg truncate">Book Title</h3>
                 <p id="reader-author" class="text-sm text-secondary-text truncate">Author</p>
             </div>
             <div class="flex items-center space-x-3 flex-shrink-0">
-                <span id="reader-progress-status" class="text-sm text-secondary-text transition-opacity duration-500"></span>
-                <span class="text-sm text-secondary-text hidden sm:inline">Page:</span>
-                <input type="number" id="reader-page-input" class="bg-tertiary-bg rounded-md w-20 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
+                <div id="pdf-controls" class="hidden items-center space-x-3">
+                    <span class="text-sm text-secondary-text hidden sm:inline">Page:</span>
+                    <input type="number" id="reader-page-input" class="bg-tertiary-bg rounded-md w-20 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
+                </div>
                 <button onclick="APP.closeReader()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x"></i></button>
             </div>
         </div>
-        <div id="reader-content" class="flex-grow w-full h-full">
-            <!-- PDF will be embedded here -->
+        <div id="reader-content" class="flex-grow w-full h-full relative">
+            <div id="reader-loader" class="absolute inset-0 flex justify-center items-center bg-primary-bg/50 z-10 hidden">
+                <div class="loader"></div>
+            </div>
+            <!-- Reader content (EPUB or PDF) will be injected here -->
+            <div id="epub-viewer" class="w-full h-full"></div>
+            <div id="epub-nav" class="hidden">
+                 <button id="prev-page" class="absolute left-0 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white/80 hover:bg-black/10 h-full w-1/4 z-20"><i data-lucide="chevron-left" class="w-8 h-8"></i></button>
+                 <button id="next-page" class="absolute right-0 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white/80 hover:bg-black/10 h-full w-1/4 z-20"><i data-lucide="chevron-right" class="w-8 h-8"></i></button>
+            </div>
         </div>
     </div>
     
@@ -256,30 +284,14 @@
         };
 		
         // --- IMPORTANT: GITHUB URL CONFIGURATION ---
-        // This is the BASE URL where your book files are hosted via GitHub Pages.
-        // 1. Your repo MUST be public and have GitHub Pages enabled.
-        // 2. The URL should look like: https://your-username.github.io/your-repo-name
-        // 3. DO NOT include a trailing slash '/'.
-        // 4. Your book files should be organized inside this repo, e.g., in a /books/ directory.
         const GITHUB_BASE_URL = "https://skyesonlyfans.github.io/ZenLib";
-
-        // --- IMPORTANT: FIRESTORE INDEX REQUIRED ---
-        // This app queries your 'books' collection. To make this work, you need to create
-        // a Firestore Index.
-        // 1. Run the app.
-        // 2. Open the browser's developer console (F12 or Ctrl+Shift+I).
-        // 3. You will see an error message from Firestore that includes a LONG URL.
-        // 4. Click that URL. It will take you directly to the Firebase console with the
-        //    correct index configuration pre-filled.
-        // 5. Click "Create Index". It will take a few minutes to build. Once it's done,
-        //    the library will load correctly.
         // =================================================================================
         
 
-        // Firebase Imports (upgraded to a more recent version)
+        // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -297,7 +309,8 @@
                 user: null,
                 isAdmin: false,
                 currentAudiobook: null,
-                readerAutosaveInterval: null,
+                currentEpub: null,
+                currentEpubRendition: null,
                 progressSaveTimeout: null,
             },
 
@@ -314,18 +327,12 @@
             initAuth() {
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        console.log("User is signed in anonymously:", user.uid);
                         this.state.user = user;
-                        // Now that we have a user, fetch their data
                         this.listenForBooks();
                         this.listenForRequests();
                         this.listenForProgress();
                     } else {
-                        console.log("No user, signing in anonymously...");
-                        signInAnonymously(auth).catch((error) => {
-                            console.error("Anonymous sign-in failed:", error);
-                            this.showToast("Authentication failed. Please refresh.", true);
-                        });
+                        signInAnonymously(auth).catch((error) => console.error("Anonymous sign-in failed:", error));
                     }
                 });
             },
@@ -334,17 +341,14 @@
                 const toast = document.getElementById('toast-notification');
                 const toastMessage = document.getElementById('toast-message');
                 const toastIcon = document.getElementById('toast-icon');
-                
                 toastMessage.textContent = message;
                 toast.style.backgroundColor = isError ? '#ef4444' : '#22c55e';
                 toastIcon.setAttribute('data-lucide', isError ? 'alert-circle' : 'check-circle');
-                
                 lucide.createIcons();
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 3000);
             },
 
-            // --- NAVIGATION ---
             navigateTo(view) {
                 this.state.currentView = view;
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -366,14 +370,12 @@
                 });
             },
 
-            // --- LIBRARY ---
             switchLibraryTab(tab) {
                 this.state.libraryTab = tab;
                 const ebooksTab = document.getElementById('ebooks-tab');
                 const audiobooksTab = document.getElementById('audiobooks-tab');
                 const setActive = (el) => el.classList.add('bg-accent-color', 'text-white');
                 const setInactive = (el) => el.classList.remove('bg-accent-color', 'text-white');
-                
                 if (tab === 'ebooks') {
                     setActive(ebooksTab); setInactive(audiobooksTab);
                 } else {
@@ -391,12 +393,6 @@
                     document.getElementById('library-loader').style.display = 'none';
                 }, (error) => {
                     console.error("Error listening for books: ", error);
-                     if (error.code === 'failed-precondition') {
-                         this.showToast("Database requires an index. See console.", true);
-                         console.log("CRITICAL: This query requires a Firestore index. Please create it. The link to create it should be in the detailed error message in your console.");
-                    } else {
-                        this.showToast("Could not fetch library.", true);
-                    }
                     document.getElementById('library-loader').style.display = 'none';
                 });
             },
@@ -404,7 +400,6 @@
             renderBooks() {
                 const grid = document.getElementById('library-grid');
                 grid.innerHTML = '';
-                // FIX: Use the singular form of the tab name for filtering
                 const singularType = this.state.libraryTab.slice(0, -1);
                 const filteredBooks = this.state.books.filter(b => b.type === singularType);
                 
@@ -419,7 +414,7 @@
                     card.className = 'cursor-pointer group relative';
                     card.innerHTML = `
                         <div class="relative overflow-hidden rounded-lg shadow-lg">
-                            <img src="${book.coverUrl}" alt="${book.title}" class="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null;this.src='https://placehold.co/400x600/1e293b/94a3b8?text=Cover+Not+Found'; console.error('Failed to load cover from URL:', this.src);">
+                            <img src="${book.coverUrl}" alt="${book.title}" class="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null;this.src='https://placehold.co/400x600/1e293b/94a3b8?text=Cover+Not+Found';">
                             <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all"></div>
                             ${progress ? `<div class="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-500/50 rounded-b-lg"><div class="h-1.5 bg-accent-color rounded-b-lg" style="width: ${progress.percentage || 0}%"></div></div>` : ''}
                         </div>
@@ -432,22 +427,19 @@
             },
 
             openBook(book) {
-                if (book.type === 'ebook') {
-                    this.openReader(book);
-                } else {
-                    this.PLAYER.playAudiobook(book);
-                }
+                if (book.type === 'ebook') this.openReader(book);
+                else this.PLAYER.playAudiobook(book);
             },
             
-            // --- PROGRESS TRACKING (FIRESTORE-BASED) ---
             listenForProgress() {
                 if (!this.state.user) return;
                 const progressCol = collection(db, "users", this.state.user.uid, "progress");
                 onSnapshot(progressCol, (snapshot) => {
+                    this.state.progress = {}; // Reset progress
                     snapshot.docs.forEach(doc => {
                         this.state.progress[doc.id] = doc.data();
                     });
-                    this.renderBooks(); // Re-render books with updated progress
+                    this.renderBooks();
                 });
             },
 
@@ -456,9 +448,7 @@
                  const progressDocRef = doc(db, "users", this.state.user.uid, "progress", bookId);
                  try {
                      await setDoc(progressDocRef, progressData, { merge: true });
-                 } catch (error) {
-                     console.error("Failed to save progress:", error);
-                 }
+                 } catch (error) { console.error("Failed to save progress:", error); }
             },
 
             getProgress(bookId) {
@@ -467,47 +457,60 @@
 
             // --- E-BOOK READER ---
             openReader(book) {
+                const modal = document.getElementById('ebook-reader-modal');
+                const readerLoader = document.getElementById('reader-loader');
                 document.getElementById('reader-title').textContent = book.title;
                 document.getElementById('reader-author').textContent = book.author;
-                const modal = document.getElementById('ebook-reader-modal');
                 modal.dataset.bookId = book.id;
-
-                const progress = this.getProgress(book.id);
-                const page = progress?.page || 1;
-                document.getElementById('reader-page-input').value = page;
-                
-                const url = `${book.fileUrl}#page=${page}&toolbar=0&navpanes=0`;
-                document.getElementById('reader-content').innerHTML = `<iframe src="${url}" class="w-full h-full border-0"></iframe>`;
-                
                 modal.style.display = 'flex';
+                readerLoader.style.display = 'flex';
 
-                this.state.readerAutosaveInterval = setInterval(() => this.savePdfProgress(), 5000);
-            },
+                const isEpub = book.fileUrl.endsWith('.epub');
+                document.getElementById('epub-nav').style.display = isEpub ? 'block' : 'none';
+                document.getElementById('pdf-controls').style.display = isEpub ? 'none' : 'flex';
+                const viewer = document.getElementById('epub-viewer');
+                viewer.innerHTML = ''; // Clear previous content
 
-            closeReader() {
-                 if (this.state.readerAutosaveInterval) {
-                     clearInterval(this.state.readerAutosaveInterval);
-                     this.state.readerAutosaveInterval = null;
-                 }
-                 this.savePdfProgress(); // Save one last time on close
-                 document.getElementById('ebook-reader-modal').style.display = 'none';
-                 document.getElementById('reader-content').innerHTML = '';
-            },
-
-            savePdfProgress() {
-                const bookId = document.getElementById('ebook-reader-modal').dataset.bookId;
-                const pageInput = document.getElementById('reader-page-input');
-                const page = pageInput.value;
-                if(bookId && page && this.state.user) {
-                    this.saveProgress(bookId, { page: parseInt(page) });
+                if (isEpub) {
+                    this.state.currentEpub = ePub(book.fileUrl);
+                    this.state.currentEpubRendition = this.state.currentEpub.renderTo(viewer, {
+                        width: "100%", height: "100%", allowScriptedContent: true
+                    });
                     
-                    const statusEl = document.getElementById('reader-progress-status');
-                    statusEl.textContent = 'Saved!';
-                    statusEl.style.opacity = 1;
-                    setTimeout(() => { statusEl.style.opacity = 0; }, 2000);
+                    const progress = this.getProgress(book.id);
+                    this.state.currentEpubRendition.display(progress?.location);
+                    
+                    this.state.currentEpubRendition.on("relocated", (location) => {
+                        this.saveProgress(book.id, { location: location.start.cfi, percentage: (this.state.currentEpub.locations.percentageFromCfi(location.start.cfi) * 100) });
+                    });
+                    
+                    this.state.currentEpub.ready.then(() => {
+                         readerLoader.style.display = 'none';
+                    });
+
+                } else { // Handle PDFs
+                    const progress = this.getProgress(book.id);
+                    const page = progress?.page || 1;
+                    document.getElementById('reader-page-input').value = page;
+                    viewer.innerHTML = `<iframe src="${book.fileUrl}#page=${page}&toolbar=0&navpanes=0" class="w-full h-full border-0"></iframe>`;
+                    readerLoader.style.display = 'none';
                 }
             },
 
+            closeReader() {
+                 const bookId = document.getElementById('ebook-reader-modal').dataset.bookId;
+                 if (this.state.currentEpub) {
+                    this.state.currentEpub.destroy();
+                    this.state.currentEpub = null;
+                    this.state.currentEpubRendition = null;
+                 } else {
+                    const page = document.getElementById('reader-page-input').value;
+                    if (bookId && page) this.saveProgress(bookId, { page: parseInt(page) });
+                 }
+                 document.getElementById('ebook-reader-modal').style.display = 'none';
+                 document.getElementById('epub-viewer').innerHTML = '';
+            },
+            
             // --- REQUESTS ---
             listenForRequests() {
                 document.getElementById('requests-loader').style.display = 'flex';
@@ -548,19 +551,12 @@
                 if (!title) {
                     this.showToast("Title is required for requests.", true); return;
                 }
-                const requestData = {
-                    title,
-                    author: document.getElementById('request-author').value,
-                    name: document.getElementById('request-name').value || 'Anonymous',
-                    type: document.getElementById('request-type').value,
-                    createdAt: serverTimestamp()
-                };
+                const requestData = { title, author: document.getElementById('request-author').value, name: document.getElementById('request-name').value || 'Anonymous', type: document.getElementById('request-type').value, createdAt: serverTimestamp() };
                 try {
                     await addDoc(collection(db, "requests"), requestData);
                     this.showToast("Request submitted successfully!");
                     document.getElementById('request-form').reset();
                 } catch(err) {
-                    console.error("Error submitting request:", err);
                     this.showToast("Failed to submit request.", true);
                 }
             },
@@ -580,7 +576,7 @@
                 e.preventDefault();
                 const user = document.getElementById('admin-user').value;
                 const pass = document.getElementById('admin-pass').value;
-                // THIS IS NOT SECURE. For a personal project, it's okay.
+                // THIS IS NOT SECURE.
                 if (user === 'skye' && pass === '639411') {
                     this.state.isAdmin = true;
                     this.closeAdminLogin();
@@ -593,12 +589,13 @@
 
             async handleUploadSubmit(e) {
                 e.preventDefault();
-                const title = document.getElementById('upload-title').value;
-                const author = document.getElementById('upload-author').value;
-                const type = document.getElementById('upload-type').value;
-                const folderName = document.getElementById('upload-folder').value.trim();
-                const coverFilename = document.getElementById('upload-cover-filename').value.trim();
-                const bookFilename = document.getElementById('upload-book-filename').value.trim();
+                const form = e.target;
+                const title = form['upload-title'].value;
+                const author = form['upload-author'].value;
+                const type = form['upload-type'].value;
+                const folderName = form['upload-folder'].value.trim();
+                const coverFilename = form['upload-cover-filename'].value.trim();
+                const bookFilename = form['upload-book-filename'].value.trim();
                 const statusEl = document.getElementById('upload-status');
                 if (!title || !author || !type || !folderName || !coverFilename || !bookFilename) {
                     this.showToast("All fields are required.", true); return;
@@ -611,96 +608,61 @@
                     await addDoc(collection(db, "books"), { title, author, type, coverUrl, fileUrl, createdAt: serverTimestamp() });
                     statusEl.textContent = '';
                     this.showToast('Book registered successfully!');
-                    document.getElementById('upload-form').reset();
+                    form.reset();
                     this.navigateTo('library');
                 } catch (err) {
-                    console.error("Registration failed: ", err);
                     this.showToast("Registration failed. Check console.", true);
                     statusEl.textContent = `Error: ${err.message}`;
                 }
             },
             
              // --- AUDIO PLAYER ---
-            hidePlayer() {
-                document.getElementById('audio-player-container').classList.remove('active');
-            },
-            
-            showPlayer() {
-                document.getElementById('audio-player-container').classList.add('active');
-            },
-
+            hidePlayer() { document.getElementById('audio-player-container').classList.remove('active'); },
+            showPlayer() { document.getElementById('audio-player-container').classList.add('active'); },
             PLAYER: {
-                audio: null,
-                speeds: [0.75, 1, 1.25, 1.5, 1.75, 2],
-                currentSpeedIndex: 1, // Index for 1x speed
-
+                audio: null, speeds: [0.75, 1, 1.25, 1.5, 1.75, 2], currentSpeedIndex: 1,
                 init() {
                     this.audio = document.getElementById('audio-element');
                     const speedMenu = document.getElementById('player-speed-menu');
                     this.speeds.forEach((speed, index) => {
-                        const speedBtn = document.createElement('button');
-                        speedBtn.className = 'py-2 px-4 hover:bg-border-color transition-colors text-sm';
-                        speedBtn.textContent = `${speed}x`;
-                        speedBtn.onclick = () => this.changeSpeed(index);
-                        speedMenu.appendChild(speedBtn);
+                        const btn = document.createElement('button');
+                        btn.className = 'py-2 px-4 hover:bg-border-color transition-colors text-sm';
+                        btn.textContent = `${speed}x`;
+                        btn.onclick = () => this.changeSpeed(index);
+                        speedMenu.appendChild(btn);
                     });
                 },
-                
                 playAudiobook(book) {
                     window.APP.state.currentAudiobook = book;
                     this.audio.src = book.fileUrl;
                     document.getElementById('player-cover').src = book.coverUrl;
                     document.getElementById('player-title').textContent = book.title;
                     document.getElementById('player-author').textContent = book.author;
-                    
                     this.audio.play().then(() => {
                         const progress = window.APP.getProgress(book.id);
-                        if (progress && progress.time) {
-                            this.audio.currentTime = progress.time;
-                        }
+                        if (progress && progress.time) this.audio.currentTime = progress.time;
                         this.updatePlayPauseIcon(true);
                         window.APP.showPlayer();
-                    }).catch(err => {
-                        console.error("Audio play failed:", err);
-                        window.APP.showToast("Could not play audio.", true);
-                    });
+                    }).catch(err => window.APP.showToast("Could not play audio.", true) );
                 },
-
                 togglePlayPause() {
                     if (!window.APP.state.currentAudiobook) return;
-                    if (this.audio.paused) {
-                        this.audio.play();
-                        this.updatePlayPauseIcon(true);
-                    } else {
-                        this.audio.pause();
-                        this.updatePlayPauseIcon(false);
-                    }
+                    this.audio.paused ? this.audio.play() : this.audio.pause();
+                    this.updatePlayPauseIcon(!this.audio.paused);
                 },
-                
                 updatePlayPauseIcon(isPlaying) {
                      document.getElementById('player-play-icon').style.display = isPlaying ? 'none' : 'block';
                      document.getElementById('player-pause-icon').style.display = isPlaying ? 'block' : 'none';
                 },
-
-                formatTime(seconds) {
-                    if(isNaN(seconds)) return '0:00';
-                    const min = Math.floor(seconds / 60);
-                    const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
-                    return `${min}:${sec}`;
-                },
-                
+                formatTime(s) { return isNaN(s) ? '0:00' : `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`; },
                 onMetadataLoaded() {
                     document.getElementById('player-duration').textContent = this.formatTime(this.audio.duration);
                     document.getElementById('player-progress').max = this.audio.duration;
                 },
-
                 updateProgressUI() {
                     if (!this.audio.duration) return;
-                    const currentTime = this.audio.currentTime;
-                    document.getElementById('player-current-time').textContent = this.formatTime(currentTime);
-                    document.getElementById('player-progress').value = currentTime;
-                    
-                    // Debounce saving progress to avoid spamming Firestore
+                    document.getElementById('player-current-time').textContent = this.formatTime(this.audio.currentTime);
+                    document.getElementById('player-progress').value = this.audio.currentTime;
                     clearTimeout(window.APP.state.progressSaveTimeout);
                     window.APP.state.progressSaveTimeout = setTimeout(() => {
                          if (window.APP.state.currentAudiobook) {
@@ -710,7 +672,6 @@
                         }
                     }, 1000);
                 },
-
                 onEnded() {
                     this.updatePlayPauseIcon(false);
                      if (window.APP.state.currentAudiobook) {
@@ -718,27 +679,15 @@
                         window.APP.saveProgress(bookId, { time: this.audio.duration, percentage: 100 });
                     }
                 },
-                
-                seek() {
-                    this.audio.currentTime = document.getElementById('player-progress').value;
-                },
-
-                skip(seconds) {
-                    if (!window.APP.state.currentAudiobook) return;
-                    this.audio.currentTime += seconds;
-                },
-                
-                changeSpeed(index) {
-                    this.currentSpeedIndex = index;
-                    const newRate = this.speeds[this.currentSpeedIndex];
+                seek() { this.audio.currentTime = document.getElementById('player-progress').value; },
+                skip(s) { if (window.APP.state.currentAudiobook) this.audio.currentTime += s; },
+                changeSpeed(i) {
+                    const newRate = this.speeds[i];
                     this.audio.playbackRate = newRate;
                     document.getElementById('player-speed-btn').textContent = `${newRate}x`;
                     document.getElementById('player-speed-menu').classList.add('hidden');
                 },
-
-                toggleSpeedMenu() {
-                    document.getElementById('player-speed-menu').classList.toggle('hidden');
-                }
+                toggleSpeedMenu() { document.getElementById('player-speed-menu').classList.toggle('hidden'); }
             },
             
             // --- Event Listeners ---
@@ -747,29 +696,26 @@
                 document.getElementById('admin-login-form').addEventListener('submit', (e) => this.handleAdminLogin(e));
                 document.getElementById('upload-form').addEventListener('submit', (e) => this.handleUploadSubmit(e));
                 document.getElementById('player-progress').addEventListener('input', () => this.PLAYER.seek());
-                document.getElementById('player-speed-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.PLAYER.toggleSpeedMenu();
-                });
-                document.body.addEventListener('click', () => {
-                     document.getElementById('player-speed-menu').classList.add('hidden');
-                });
+                document.getElementById('player-speed-btn').addEventListener('click', (e) => { e.stopPropagation(); this.PLAYER.toggleSpeedMenu(); });
+                document.body.addEventListener('click', () => document.getElementById('player-speed-menu').classList.add('hidden'));
+
+                // Reader navigation
+                document.getElementById('prev-page').addEventListener('click', () => this.state.currentEpubRendition?.prev());
+                document.getElementById('next-page').addEventListener('click', () => this.state.currentEpubRendition?.next());
             }
         };
 
         // --- Start the App ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            
-            if(firebaseConfig.apiKey.startsWith("AIzaSy") && !GITHUB_BASE_URL.includes("your-username.github.io")) {
+            if(!GITHUB_BASE_URL.includes("your-username.github.io")) {
                  window.APP.init();
             } else {
                 document.getElementById('main-content').innerHTML = `
                 <div class="text-center p-10 bg-red-900/50 border border-red-500 rounded-lg max-w-2xl mx-auto">
                     <h2 class="text-3xl font-bold text-red-300">Configuration Needed</h2>
-                    <p class="mt-4 text-red-200">Welcome to ZenLib! To get started, please configure your Firebase credentials and your GitHub Base URL in the script tag at the bottom of this HTML file.</p>
-                </div>
-                `;
+                    <p class="mt-4 text-red-200">Welcome to ZenLib! To get started, please configure your GitHub Base URL in the script tag at the bottom of this HTML file.</p>
+                </div>`;
             }
         });
 
