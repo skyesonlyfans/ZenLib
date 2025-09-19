@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZenLib by Skye &lt;3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- New E-book reader library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,101 +14,89 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-bg:#f8fafc;
-            --secondary-bg:#ffffff;
-            --tertiary-bg:#eef2f7;
-            --border-color:#e6eef8;
-            --primary-text:#0f172a;
-            --secondary-text:#475569;
-            --accent-color:#0369a1;
-            --accent-hover:#075985;
-        }
-        html.dark {
-            --primary-bg:#0f172a;
-            --secondary-bg:#1e293b;
-            --tertiary-bg:#334155;
-            --border-color:#475569;
-            --primary-text:#f1f5f9;
-            --secondary-text:#94a3b8;
-            --accent-color:#38bdf8;
-            --accent-hover:#0ea5e9;
+            --primary-bg: #0f172a; /* Slate 900 */
+            --secondary-bg: #1e293b; /* Slate 800 */
+            --tertiary-bg: #334155; /* Slate 700 */
+            --border-color: #475569; /* Slate 600 */
+            --primary-text: #f1f5f9; /* Slate 100 */
+            --secondary-text: #94a3b8; /* Slate 400 */
+            --accent-color: #38bdf8; /* Sky 400 */
+            --accent-hover: #0ea5e9; /* Sky 500 */
         }
         html { scroll-behavior: smooth; }
-        body { background-color:var(--primary-bg); color:var(--primary-text); font-family:'Inter',sans-serif; transition:background-color .35s, color .35s; }
-        .zen-scrollbar::-webkit-scrollbar { width:8px; }
-        .zen-scrollbar::-webkit-scrollbar-track { background:transparent; }
-        .zen-scrollbar::-webkit-scrollbar-thumb { background:rgba(148,163,184,0.18); border-radius:10px; }
-        .view { display:none; }
-        .view.active { display:block; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        .animate-fade-in { animation:fadeIn .45s ease-out forwards; }
-        #audio-player-container { transition:transform .3s ease-in-out; transform:translateY(100%); }
-        #audio-player-container.active { transform:translateY(0); }
-        .progress-bar { -webkit-appearance:none; appearance:none; width:100%; height:6px; background:var(--tertiary-bg); outline:none; border-radius:6px; transition:opacity .2s; }
-        .progress-bar::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; background:var(--accent-color); cursor:pointer; border-radius:50%; border:2px solid var(--secondary-bg); }
-        .loader { border:4px solid rgba(0,0,0,0.06); border-top:4px solid var(--accent-color); border-radius:50%; width:48px; height:48px; animation:spin 1s linear infinite; }
-        @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
-        #toast-notification { transition:transform .45s ease-in-out, opacity .45s ease-in-out; transform:translateY(100%); opacity:0; }
-        #toast-notification.show { transform:translateY(0); opacity:1; }
-        .logo-font { font-family:'Playfair Display', serif; }
-        select { -webkit-appearance:none; -moz-appearance:none; appearance:none; padding-right:2.5rem; }
-        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow:0 0 0 30px var(--secondary-bg) inset !important; -webkit-text-fill-color:var(--primary-text) !important; transition:background-color 5000s ease-in-out 0s; }
-        #epub-viewer { height:100%; width:100%; background-color:var(--secondary-bg); color:var(--primary-text); transition:background-color .25s, color .25s; overflow:auto; }
-        .reader-surface { border-radius:10px; box-shadow:0 8px 30px rgba(2,6,23,0.12); overflow:hidden; position:relative; }
-        .toc-panel { width:320px; max-width:80vw; background:var(--secondary-bg); color:var(--primary-text); overflow:auto; border-left:1px solid var(--border-color); padding:12px; }
-        .toc-item { padding:8px 10px; border-radius:6px; cursor:pointer; transition:background .15s, color .15s; }
-        .toc-item:hover { background:var(--tertiary-bg); }
-        .reader-controls { display:flex; gap:8px; align-items:center; }
-        .theme-toggle { width:48px; height:28px; background:linear-gradient(180deg, rgba(0,0,0,0.03), rgba(255,255,255,0.02)); border-radius:999px; display:inline-flex; align-items:center; padding:3px; cursor:pointer; }
-        .theme-toggle-ball { width:22px; height:22px; background:white; border-radius:999px; box-shadow:0 3px 8px rgba(2,6,23,0.15); transform:translateX(0); transition:transform .25s ease; }
-        .page-fade { animation:fadeIn .28s ease both; }
-        .font-btn { padding:.35rem .5rem; border-radius:8px; border:1px solid var(--border-color); background:transparent; cursor:pointer; }
-        .bg-accent-color {
-            background-color: var(--accent-color);
+        body { background-color: var(--primary-bg); color: var(--primary-text); font-family: 'Inter', sans-serif; }
+        .zen-scrollbar::-webkit-scrollbar { width: 8px; }
+        .zen-scrollbar::-webkit-scrollbar-track { background: var(--secondary-bg); border-radius: 10px; }
+        .zen-scrollbar::-webkit-scrollbar-thumb { background: var(--tertiary-bg); border-radius: 10px; }
+        .zen-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--border-color); }
+        .view { display: none; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        #audio-player-container { transition: transform 0.3s ease-in-out; transform: translateY(100%); }
+        #audio-player-container.active { transform: translateY(0); }
+        .progress-bar { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: var(--tertiary-bg); outline: none; border-radius: 6px; transition: opacity .2s; }
+        .progress-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: var(--accent-color); cursor: pointer; border-radius: 50%; border: 2px solid var(--secondary-bg); }
+        .progress-bar::-moz-range-thumb { width: 16px; height: 16px; background: var(--accent-color); cursor: pointer; border-radius: 50%; border: 2px solid var(--secondary-bg); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { border: 4px solid var(--tertiary-bg); border-top: 4px solid var(--accent-color); border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        #toast-notification { transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out; transform: translateY(100%); opacity: 0; }
+        #toast-notification.show { transform: translateY(0px); opacity: 1; }
+        .logo-font { font-family: 'Playfair Display', serif; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px var(--tertiary-bg) inset !important; -webkit-text-fill-color: var(--primary-text) !important; transition: background-color 5000s ease-in-out 0s; }
+        input[type="text"], input[type="password"], input[type="number"], select { color-scheme: dark; }
+        
+        /* EPUB Reader Styles */
+        #epub-viewer {
+            height: 100%;
+            width: 100%;
+            background-color: #fff; /* Set a background for the book pages */
+            color: #000;
+        }
+        #ebook-reader-modal .epubjs-arrow {
+            font-size: 40px;
+            background: rgba(0,0,0,0.2);
             color: white;
-        }
-        html.dark .bg-accent-color {
-            color: var(--primary-bg); /* e.g. dark blue text on light blue bg */
-        }
-        @media (prefers-reduced-motion:reduce) { .animate-fade-in, .page-fade { animation:none; } }
-        /* Hide epub page turn buttons on mobile for swipe controls */
-        @media (max-width: 767px) {
-            #epub-nav {
-                display: none !important;
-            }
+            padding: 0 10px;
+            line-height: 1;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body class="zen-scrollbar">
+
+    <!-- Main Container -->
     <div id="app-container" class="max-w-7xl mx-auto min-h-screen flex flex-col">
+        
+        <!-- Header -->
         <header class="p-4 flex justify-between items-center sticky top-0 bg-primary-bg/80 backdrop-blur-lg z-20 border-b border-border-color/50 shadow-lg">
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight logo-font">ZenLib <span class="text-sky-400 text-xl">by Skye</span></h1>
-            <div class="flex items-center space-x-3">
-                <div class="flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="hidden md:block"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M4.93 4.93l1.41 1.41"></path><path d="M17.66 17.66l1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M4.93 19.07l1.41-1.41"></path><path d="M17.66 6.34l1.41-1.41"></path></svg>
-                    <div id="theme-toggle" class="theme-toggle" title="Toggle light / dark">
-                        <div id="theme-toggle-ball" class="theme-toggle-ball"></div>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="md:block"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
-                </div>
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    <button onclick="APP.navigateTo('library')" class="nav-btn p-2 rounded-lg hover:bg-secondary-bg transition-colors" data-view="library"><i data-lucide="library" class="w-5 h-5 md:w-6 md:h-6"></i></button>
-                    <button onclick="APP.navigateTo('requests')" class="nav-btn p-2 rounded-lg hover:bg-secondary-bg transition-colors" data-view="requests"><i data-lucide="mail-plus" class="w-5 h-5 md:w-6 md:h-6"></i></button>
-                    <button onclick="APP.openAdminLogin()" class="p-2 rounded-lg hover:bg-secondary-bg transition-colors text-secondary-text hover:text-primary-text"><i data-lucide="settings" class="w-5 h-5 md:w-6 md:h-6"></i></button>
-                </nav>
-            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight logo-font">ZenLib <span class="text-sky-400 text-xl">by Skye</span></h1>
+            <nav class="flex items-center space-x-1 md:space-x-2">
+                <button onclick="APP.navigateTo('library')" class="nav-btn p-2 rounded-lg hover:bg-secondary-bg transition-colors" data-view="library"><i data-lucide="library" class="w-5 h-5 md:w-6 md:h-6"></i></button>
+                <button onclick="APP.navigateTo('requests')" class="nav-btn p-2 rounded-lg hover:bg-secondary-bg transition-colors" data-view="requests"><i data-lucide="mail-plus" class="w-5 h-5 md:w-6 md:h-6"></i></button>
+                <button onclick="APP.openAdminLogin()" class="p-2 rounded-lg hover:bg-secondary-bg transition-colors text-secondary-text hover:text-primary-text"><i data-lucide="settings" class="w-5 h-5 md:w-6 md:h-6"></i></button>
+            </nav>
         </header>
+
+        <!-- Dynamic Content Area -->
         <main id="main-content" class="flex-grow p-4 md:p-6 pb-40">
+
+            <!-- Library View -->
             <section id="library-view" class="view active animate-fade-in">
                 <div class="flex items-center justify-center mb-6 md:mb-8 bg-secondary-bg p-1 rounded-lg max-w-xs mx-auto">
                     <button id="ebooks-tab" onclick="APP.switchLibraryTab('ebooks')" class="w-1/2 py-2 px-4 text-sm md:text-base font-semibold rounded-md transition-colors">E-Books</button>
                     <button id="audiobooks-tab" onclick="APP.switchLibraryTab('audiobooks')" class="w-1/2 py-2 px-4 text-sm md:text-base font-semibold rounded-md transition-colors">Audiobooks</button>
                 </div>
-                <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6"></div>
+                <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                    <!-- Book cards will be injected here -->
+                </div>
                 <div id="library-loader" class="flex justify-center items-center py-20">
                      <div class="loader"></div>
                 </div>
             </section>
+
+            <!-- Requests View -->
             <section id="requests-view" class="view animate-fade-in">
                 <div class="max-w-2xl mx-auto">
                     <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">Request a Book</h2>
@@ -136,13 +125,18 @@
                         </div>
                         <button type="submit" class="w-full !mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]">Submit Request</button>
                     </form>
+
                     <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">Request Wall</h2>
-                    <div id="request-wall" class="space-y-4"></div>
+                    <div id="request-wall" class="space-y-4">
+                        <!-- Requests will be injected here -->
+                    </div>
                      <div id="requests-loader" class="flex justify-center items-center py-20">
                          <div class="loader"></div>
                     </div>
                 </div>
             </section>
+
+            <!-- Admin View -->
             <section id="admin-view" class="view animate-fade-in">
                 <div class="max-w-2xl mx-auto">
                     <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">Admin Panel</h2>
@@ -189,10 +183,11 @@
         </main>
     </div>
 
+    <!-- E-Book Reader Modal -->
     <div id="ebook-reader-modal" class="fixed inset-0 bg-primary-bg/90 backdrop-blur-md z-40 hidden flex-col">
         <div class="flex justify-between items-center p-4 bg-secondary-bg/80 border-b border-border-color/50 flex-shrink-0">
-            <div class="overflow-hidden min-w-0">
-                <h3 id="reader-title" class="font-bold text-lg truncate text-primary-text">Book Title</h3>
+            <div class="text-white overflow-hidden">
+                <h3 id="reader-title" class="font-bold text-lg truncate">Book Title</h3>
                 <p id="reader-author" class="text-sm text-secondary-text truncate">Author</p>
             </div>
             <div class="flex items-center space-x-3 flex-shrink-0">
@@ -200,35 +195,28 @@
                     <span class="text-sm text-secondary-text hidden sm:inline">Page:</span>
                     <input type="number" id="reader-page-input" class="bg-tertiary-bg rounded-md w-20 text-center p-1 focus:outline-none focus:ring-2 focus:ring-accent-color">
                 </div>
-                <div class="reader-controls">
-                    <button id="toc-toggle" class="p-2 rounded-lg hover:bg-tertiary-bg transition-colors" title="Table of Contents"><i data-lucide="list" class="w-5 h-5"></i></button>
-                    <button id="font-decrease" class="font-btn" title="Decrease font">A-</button>
-                    <button id="font-increase" class="font-btn" title="Increase font">A+</button>
-                    <button id="font-toggle" class="font-btn" title="Toggle serif/sans">Serif</button>
-                </div>
                 <button onclick="APP.closeReader()" class="p-2 rounded-full hover:bg-tertiary-bg transition-colors"><i data-lucide="x"></i></button>
             </div>
         </div>
-        <div id="reader-content" class="flex-grow w-full h-full relative flex">
-            <div id="toc-panel" class="toc-panel hidden"></div>
-            <div id="reader-main" class="flex-grow relative">
-                <div id="reader-loader" class="absolute inset-0 flex justify-center items-center bg-primary-bg/50 z-10 hidden">
-                    <div class="loader"></div>
-                </div>
-                <div id="epub-viewer" class="w-full h-full reader-surface"></div>
-                <div id="epub-nav" class="hidden">
-                     <button id="prev-page" class="absolute left-0 top-1/2 -translate-y-1/2 p-4 text-primary-text/30 hover:text-primary-text/80 hover:bg-black/5 h-full w-1/4 z-20"><i data-lucide="chevron-left" class="w-8 h-8"></i></button>
-                     <button id="next-page" class="absolute right-0 top-1/2 -translate-y-1/2 p-4 text-primary-text/30 hover:text-primary-text/80 hover:bg-black/5 h-full w-1/4 z-20"><i data-lucide="chevron-right" class="w-8 h-8"></i></button>
-                </div>
+        <div id="reader-content" class="flex-grow w-full h-full relative">
+            <div id="reader-loader" class="absolute inset-0 flex justify-center items-center bg-primary-bg/50 z-10 hidden">
+                <div class="loader"></div>
+            </div>
+            <!-- Reader content (EPUB or PDF) will be injected here -->
+            <div id="epub-viewer" class="w-full h-full"></div>
+            <div id="epub-nav" class="hidden">
+                 <button id="prev-page" class="absolute left-0 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white/80 hover:bg-black/10 h-full w-1/4 z-20"><i data-lucide="chevron-left" class="w-8 h-8"></i></button>
+                 <button id="next-page" class="absolute right-0 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white/80 hover:bg-black/10 h-full w-1/4 z-20"><i data-lucide="chevron-right" class="w-8 h-8"></i></button>
             </div>
         </div>
     </div>
-
+    
+    <!-- Audiobook Player -->
     <div id="audio-player-container" class="fixed bottom-0 left-0 right-0 bg-secondary-bg/80 backdrop-blur-lg z-30 p-3 shadow-2xl border-t border-border-color/50">
         <div class="max-w-7xl mx-auto flex items-center space-x-3 md:space-x-4">
             <img id="player-cover" src="https://placehold.co/64x64/1e293b/94a3b8?text=ZenLib" class="w-14 h-14 md:w-16 md:h-16 rounded-lg object-cover shadow-md flex-shrink-0">
             <div class="flex-grow overflow-hidden">
-                <h4 id="player-title" class="font-semibold text-primary-text truncate">Select an audiobook</h4>
+                <h4 id="player-title" class="font-semibold text-white truncate">Select an audiobook</h4>
                 <p id="player-author" class="text-sm text-secondary-text truncate">to begin</p>
                 <div class="flex items-center space-x-2 mt-1">
                     <span id="player-current-time" class="text-xs text-secondary-text w-10 text-center">0:00</span>
@@ -245,7 +233,9 @@
                 <button onclick="APP.PLAYER.skip(15)" class="p-2 hover:bg-tertiary-bg rounded-full transition-colors hidden sm:block"><i data-lucide="fast-forward" class="w-5 h-5"></i></button>
                 <div class="relative">
                      <button id="player-speed-btn" class="p-2 hover:bg-tertiary-bg rounded-full transition-colors w-12 text-sm font-semibold">1x</button>
-                     <div id="player-speed-menu" class="absolute bottom-full mb-2 right-0 bg-tertiary-bg rounded-md shadow-lg hidden flex-col w-20"></div>
+                     <div id="player-speed-menu" class="absolute bottom-full mb-2 right-0 bg-tertiary-bg rounded-md shadow-lg hidden flex-col w-20">
+                         <!-- Speeds will be injected here -->
+                     </div>
                 </div>
                 <button onclick="APP.hidePlayer()" class="p-2 hover:bg-tertiary-bg rounded-full text-secondary-text hidden md:block"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
@@ -253,16 +243,17 @@
         <audio id="audio-element" ontimeupdate="APP.PLAYER.updateProgressUI()" onloadedmetadata="APP.PLAYER.onMetadataLoaded()" onended="APP.PLAYER.onEnded()"></audio>
     </div>
 
+    <!-- Admin Login Modal -->
     <div id="admin-login-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden justify-center items-center p-4">
         <div class="bg-secondary-bg p-8 rounded-xl shadow-xl w-full max-w-sm border border-border-color/50">
             <h2 class="text-2xl font-bold text-center mb-6">Admin Login</h2>
             <form id="admin-login-form" class="space-y-4">
                 <div>
-                    <label for="admin-user" class="block mb-1.5 text-sm font-medium text-secondary-text">Username</label>
+                     <label for="admin-user" class="block mb-1.5 text-sm font-medium text-secondary-text">Username</label>
                     <input type="text" id="admin-user" placeholder="Username" class="bg-tertiary-bg p-3 rounded-lg w-full placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-color">
                 </div>
                 <div>
-                    <label for="admin-pass" class="block mb-1.5 text-sm font-medium text-secondary-text">Password</label>
+                     <label for="admin-pass" class="block mb-1.5 text-sm font-medium text-secondary-text">Password</label>
                     <input type="password" id="admin-pass" placeholder="Password" class="bg-tertiary-bg p-3 rounded-lg w-full placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-color">
                 </div>
                 <button type="submit" class="w-full !mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300">Login</button>
@@ -271,13 +262,18 @@
             </form>
         </div>
     </div>
-
+    
+    <!-- Toast Notification -->
     <div id="toast-notification" class="fixed bottom-24 md:bottom-auto md:top-24 right-1/2 translate-x-1/2 md:right-8 md:translate-x-0 z-50 text-white py-2 px-5 rounded-lg shadow-lg flex items-center space-x-3">
         <i id="toast-icon" data-lucide="check-circle" class="w-5 h-5"></i>
         <p id="toast-message">Success!</p>
     </div>
 
+    <!-- Firebase SDKs -->
     <script type="module">
+        // =================================================================================
+        // --- CONFIGURATION ---
+        // =================================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBL4d9wa8RPjSD2f6lVlpCc9BiTPQ3i_gY",
             authDomain: "zenlib-46846.firebaseapp.com",
@@ -286,16 +282,23 @@
             messagingSenderId: "353115027161",
             appId: "1:353115027161:web:b82c03f76e93be68e330c8"
         };
+		
+        // --- IMPORTANT: GITHUB URL CONFIGURATION ---
         const GITHUB_BASE_URL = "https://skyesonlyfans.github.io/ZenLib";
+        // =================================================================================
+        
 
+        // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+        
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // --- GLOBAL APP STATE AND LOGIC ---
         window.APP = {
             state: {
                 currentView: 'library',
@@ -309,16 +312,13 @@
                 currentEpub: null,
                 currentEpubRendition: null,
                 progressSaveTimeout: null,
-                currentFontSizePercent: 100,
-                isSerif: false,
-                tocVisible: false
             },
 
             init() {
+                console.log("ZenLib Initializing...");
                 this.initAuth();
                 this.attachEventListeners();
                 lucide.createIcons();
-                this.loadTheme();
                 this.updateNav();
                 this.switchLibraryTab('ebooks');
                 this.PLAYER.init();
@@ -355,7 +355,7 @@
                 const activeView = document.getElementById(`${view}-view`);
                 activeView.classList.add('active');
                 activeView.classList.remove('animate-fade-in');
-                void activeView.offsetWidth;
+                void activeView.offsetWidth; 
                 activeView.classList.add('animate-fade-in');
                 window.scrollTo(0, 0);
                 this.updateNav();
@@ -374,7 +374,7 @@
                 this.state.libraryTab = tab;
                 const ebooksTab = document.getElementById('ebooks-tab');
                 const audiobooksTab = document.getElementById('audiobooks-tab');
-                const setActive = (el) => el.classList.add('bg-accent-color');
+                const setActive = (el) => el.classList.add('bg-accent-color', 'text-white');
                 const setInactive = (el) => el.classList.remove('bg-accent-color', 'text-white');
                 if (tab === 'ebooks') {
                     setActive(ebooksTab); setInactive(audiobooksTab);
@@ -396,13 +396,13 @@
                     document.getElementById('library-loader').style.display = 'none';
                 });
             },
-
+            
             renderBooks() {
                 const grid = document.getElementById('library-grid');
                 grid.innerHTML = '';
                 const singularType = this.state.libraryTab.slice(0, -1);
                 const filteredBooks = this.state.books.filter(b => b.type === singularType);
-
+                
                 if (filteredBooks.length === 0) {
                     grid.innerHTML = `<p class="col-span-full text-center text-secondary-text mt-8">No ${this.state.libraryTab} found. Request some!</p>`;
                     return;
@@ -430,12 +430,12 @@
                 if (book.type === 'ebook') this.openReader(book);
                 else this.PLAYER.playAudiobook(book);
             },
-
+            
             listenForProgress() {
                 if (!this.state.user) return;
                 const progressCol = collection(db, "users", this.state.user.uid, "progress");
                 onSnapshot(progressCol, (snapshot) => {
-                    this.state.progress = {};
+                    this.state.progress = {}; // Reset progress
                     snapshot.docs.forEach(doc => {
                         this.state.progress[doc.id] = doc.data();
                     });
@@ -444,22 +444,18 @@
             },
 
             async saveProgress(bookId, progressData) {
-                if (!bookId) return;
-                try {
-                    if (this.state.user) {
-                        const progressDocRef = doc(db, "users", this.state.user.uid, "progress", bookId);
-                        await setDoc(progressDocRef, progressData, { merge: true });
-                    }
-                } catch (error) { console.error("Failed to save progress:", error); }
-                try { localStorage.setItem(`zen_progress_${bookId}`, JSON.stringify(progressData)); } catch (e) {}
+                 if (!this.state.user || !bookId) return;
+                 const progressDocRef = doc(db, "users", this.state.user.uid, "progress", bookId);
+                 try {
+                     await setDoc(progressDocRef, progressData, { merge: true });
+                 } catch (error) { console.error("Failed to save progress:", error); }
             },
 
             getProgress(bookId) {
-                return this.state.progress[bookId] || (() => {
-                    try { return JSON.parse(localStorage.getItem(`zen_progress_${bookId}`)); } catch (e) { return null; }
-                })();
+                return this.state.progress[bookId] || null;
             },
 
+            // --- E-BOOK READER ---
             openReader(book) {
                 const modal = document.getElementById('ebook-reader-modal');
                 const readerLoader = document.getElementById('reader-loader');
@@ -473,84 +469,26 @@
                 document.getElementById('epub-nav').style.display = isEpub ? 'block' : 'none';
                 document.getElementById('pdf-controls').style.display = isEpub ? 'none' : 'flex';
                 const viewer = document.getElementById('epub-viewer');
-                viewer.innerHTML = '';
+                viewer.innerHTML = ''; // Clear previous content
 
                 if (isEpub) {
                     this.state.currentEpub = ePub(book.fileUrl);
                     this.state.currentEpubRendition = this.state.currentEpub.renderTo(viewer, {
                         width: "100%", height: "100%", allowScriptedContent: true
                     });
-
-                    try {
-                        const cssBase = `body { background: ${getComputedStyle(document.documentElement).getPropertyValue('--secondary-bg').trim()}; color: ${getComputedStyle(document.documentElement).getPropertyValue('--primary-text').trim()}; font-family: Inter, sans-serif; line-height:1.55; } p, h1, h2, h3, li, span, a { color: inherit; } img { max-width:100%; height:auto; }`;
-                        const cssSerif = `body { font-family: Georgia, 'Times New Roman', serif; }`;
-                        this.state.currentEpubRendition.themes.register('zen-base', cssBase);
-                        this.state.currentEpubRendition.themes.register('zen-serif', cssSerif);
-                        this.state.currentEpubRendition.themes.register('zen-light-mode', `body { background: ${getComputedStyle(document.documentElement).getPropertyValue('--secondary-bg').trim()}; color: ${getComputedStyle(document.documentElement).getPropertyValue('--primary-text').trim()}; }`);
-                        this.state.currentEpubRendition.themes.register('zen-dark-mode', `body { background: ${getComputedStyle(document.documentElement).getPropertyValue('--secondary-bg').trim()}; color: ${getComputedStyle(document.documentElement).getPropertyValue('--primary-text').trim()}; }`);
-                    } catch (err) {}
-
+                    
+                    const progress = this.getProgress(book.id);
+                    this.state.currentEpubRendition.display(progress?.location);
+                    
                     this.state.currentEpubRendition.on("relocated", (location) => {
-                        try {
-                            if(this.state.currentEpub && this.state.currentEpub.locations) {
-                                const percentage = this.state.currentEpub.locations.percentageFromCfi(location.start.cfi) * 100;
-                                this.saveProgress(book.id, { location: location?.start?.cfi || null, percentage });
-                            } else {
-                                this.saveProgress(book.id, { location: location?.start?.cfi || null });
-                            }
-                        } catch (e) {
-                            this.saveProgress(book.id, { location: location?.start?.cfi || null });
-                        }
-                        const v = document.getElementById('epub-viewer');
-                        v.classList.remove('page-fade');
-                        void v.offsetWidth;
-                        v.classList.add('page-fade');
+                        this.saveProgress(book.id, { location: location.start.cfi, percentage: (this.state.currentEpub.locations.percentageFromCfi(location.start.cfi) * 100) });
                     });
-
-                    this.state.currentEpub.loaded.navigation.then((nav) => {
-                        try {
-                            const tocPanel = document.getElementById('toc-panel');
-                            tocPanel.innerHTML = '';
-                            const ul = document.createElement('div');
-                            nav.toc.forEach(item => {
-                                const el = document.createElement('div');
-                                el.className = 'toc-item';
-                                el.textContent = item.label;
-                                el.onclick = () => {
-                                    try { this.state.currentEpubRendition.display(item.href); } catch (e) { this.showToast('Could not open chapter', true); }
-                                };
-                                ul.appendChild(el);
-                            });
-                            tocPanel.appendChild(ul);
-                        } catch (e) {}
-                    }).catch(()=>{});
-
+                    
                     this.state.currentEpub.ready.then(() => {
-                        return this.state.currentEpub.locations.generate(1600);
-                    }).then(() => {
-                         const progress = this.getProgress(book.id);
-                         const initialLocation = progress?.location || null;
-                         this.state.currentEpubRendition.display(initialLocation);
-                         
                          readerLoader.style.display = 'none';
-                         
-                         try {
-                             const theme = localStorage.getItem('zen_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                             const mode = (theme === 'dark') ? 'zen-dark-mode' : 'zen-light-mode';
-                             this.state.currentEpubRendition.themes.select('zen-base');
-                             if (this.state.currentEpubRendition.themes.select) this.state.currentEpubRendition.themes.select(mode);
-                             if (this.state.isSerif) this.state.currentEpubRendition.themes.select('zen-serif');
-                             if (this.state.currentFontSizePercent && this.state.currentFontSizePercent !== 100) {
-                                 try { this.state.currentEpubRendition.themes.fontSize(`${this.state.currentFontSizePercent}%`); } catch(e){}
-                             }
-                         } catch(e){}
-                    }).catch((err) => {
-                        console.error("Error rendering epub:", err);
-                        this.showToast("Error opening this book.", true);
-                        readerLoader.style.display = 'none';
                     });
 
-                } else {
+                } else { // Handle PDFs
                     const progress = this.getProgress(book.id);
                     const page = progress?.page || 1;
                     document.getElementById('reader-page-input').value = page;
@@ -560,21 +498,20 @@
             },
 
             closeReader() {
-                const bookId = document.getElementById('ebook-reader-modal').dataset.bookId;
-                if (this.state.currentEpub) {
-                    try { this.state.currentEpub.destroy(); } catch (e) {}
+                 const bookId = document.getElementById('ebook-reader-modal').dataset.bookId;
+                 if (this.state.currentEpub) {
+                    this.state.currentEpub.destroy();
                     this.state.currentEpub = null;
                     this.state.currentEpubRendition = null;
-                } else {
+                 } else {
                     const page = document.getElementById('reader-page-input').value;
                     if (bookId && page) this.saveProgress(bookId, { page: parseInt(page) });
-                }
-                document.getElementById('ebook-reader-modal').style.display = 'none';
-                document.getElementById('epub-viewer').innerHTML = '';
-                document.getElementById('toc-panel').classList.add('hidden');
-                this.state.tocVisible = false;
+                 }
+                 document.getElementById('ebook-reader-modal').style.display = 'none';
+                 document.getElementById('epub-viewer').innerHTML = '';
             },
-
+            
+            // --- REQUESTS ---
             listenForRequests() {
                 document.getElementById('requests-loader').style.display = 'flex';
                 const q = query(collection(db, "requests"), orderBy("createdAt", "desc"));
@@ -591,7 +528,7 @@
             renderRequests() {
                 const wall = document.getElementById('request-wall');
                 wall.innerHTML = '';
-                if (this.state.requests.length === 0) {
+                 if (this.state.requests.length === 0) {
                     wall.innerHTML = `<p class="text-center text-secondary-text">No requests yet. Be the first!</p>`;
                     return;
                 }
@@ -611,16 +548,44 @@
             async handleRequestSubmit(e) {
                 e.preventDefault();
                 const title = document.getElementById('request-title').value;
-                if (!title) { this.showToast("Title is required for requests.", true); return; }
+                if (!title) {
+                    this.showToast("Title is required for requests.", true); return;
+                }
                 const requestData = { title, author: document.getElementById('request-author').value, name: document.getElementById('request-name').value || 'Anonymous', type: document.getElementById('request-type').value, createdAt: serverTimestamp() };
-                try { await addDoc(collection(db, "requests"), requestData); this.showToast("Request submitted successfully!"); document.getElementById('request-form').reset(); } catch(err) { this.showToast("Failed to submit request.", true); }
+                try {
+                    await addDoc(collection(db, "requests"), requestData);
+                    this.showToast("Request submitted successfully!");
+                    document.getElementById('request-form').reset();
+                } catch(err) {
+                    this.showToast("Failed to submit request.", true);
+                }
+            },
+            
+            // --- ADMIN & UPLOADS ---
+            openAdminLogin() {
+                if (this.state.isAdmin) this.navigateTo('admin');
+                else document.getElementById('admin-login-modal').style.display = 'flex';
+            },
+            
+            closeAdminLogin() {
+                 document.getElementById('admin-login-modal').style.display = 'none';
+                 document.getElementById('admin-login-error').textContent = '';
             },
 
-            openAdminLogin() { if (this.state.isAdmin) this.navigateTo('admin'); else document.getElementById('admin-login-modal').style.display = 'flex'; },
-
-            closeAdminLogin() { document.getElementById('admin-login-modal').style.display = 'none'; document.getElementById('admin-login-error').textContent = ''; },
-
-            handleAdminLogin(e) { e.preventDefault(); const user = document.getElementById('admin-user').value; const pass = document.getElementById('admin-pass').value; if (user === 'skye' && pass === '639411') { this.state.isAdmin = true; this.closeAdminLogin(); this.navigateTo('admin'); this.showToast("Admin access granted."); } else { document.getElementById('admin-login-error').textContent = 'Invalid credentials.'; } },
+            handleAdminLogin(e) {
+                e.preventDefault();
+                const user = document.getElementById('admin-user').value;
+                const pass = document.getElementById('admin-pass').value;
+                // THIS IS NOT SECURE.
+                if (user === 'skye' && pass === '639411') {
+                    this.state.isAdmin = true;
+                    this.closeAdminLogin();
+                    this.navigateTo('admin');
+                    this.showToast("Admin access granted.");
+                } else {
+                    document.getElementById('admin-login-error').textContent = 'Invalid credentials.';
+                }
+            },
 
             async handleUploadSubmit(e) {
                 e.preventDefault();
@@ -632,25 +597,36 @@
                 const coverFilename = form['upload-cover-filename'].value.trim();
                 const bookFilename = form['upload-book-filename'].value.trim();
                 const statusEl = document.getElementById('upload-status');
-                if (!title || !author || !type || !folderName || !coverFilename || !bookFilename) { this.showToast("All fields are required.", true); return; }
+                if (!title || !author || !type || !folderName || !coverFilename || !bookFilename) {
+                    this.showToast("All fields are required.", true); return;
+                }
                 statusEl.textContent = 'Registering book...';
                 const basePath = `${GITHUB_BASE_URL}/books/${type}s/${folderName}`;
                 const coverUrl = `${basePath}/${coverFilename}`;
                 const fileUrl = `${basePath}/${bookFilename}`;
-                try { await addDoc(collection(db, "books"), { title, author, type, coverUrl, fileUrl, createdAt: serverTimestamp() }); statusEl.textContent = ''; this.showToast('Book registered successfully!'); form.reset(); this.navigateTo('library'); } catch (err) { this.showToast("Registration failed. Check console.", true); statusEl.textContent = `Error: ${err.message}`; }
+                try {
+                    await addDoc(collection(db, "books"), { title, author, type, coverUrl, fileUrl, createdAt: serverTimestamp() });
+                    statusEl.textContent = '';
+                    this.showToast('Book registered successfully!');
+                    form.reset();
+                    this.navigateTo('library');
+                } catch (err) {
+                    this.showToast("Registration failed. Check console.", true);
+                    statusEl.textContent = `Error: ${err.message}`;
+                }
             },
-
+            
+             // --- AUDIO PLAYER ---
             hidePlayer() { document.getElementById('audio-player-container').classList.remove('active'); },
             showPlayer() { document.getElementById('audio-player-container').classList.add('active'); },
-
             PLAYER: {
-                audio: null, speeds: [0.75,1,1.25,1.5,1.75,2], currentSpeedIndex:1,
+                audio: null, speeds: [0.75, 1, 1.25, 1.5, 1.75, 2], currentSpeedIndex: 1,
                 init() {
                     this.audio = document.getElementById('audio-element');
                     const speedMenu = document.getElementById('player-speed-menu');
-                    this.speeds.forEach((speed,index) => {
+                    this.speeds.forEach((speed, index) => {
                         const btn = document.createElement('button');
-                        btn.className = 'py-2 px-4 hover:bg-border-color transition-colors text-sm w-full text-left text-primary-text';
+                        btn.className = 'py-2 px-4 hover:bg-border-color transition-colors text-sm';
                         btn.textContent = `${speed}x`;
                         btn.onclick = () => this.changeSpeed(index);
                         speedMenu.appendChild(btn);
@@ -667,12 +643,22 @@
                         if (progress && progress.time) this.audio.currentTime = progress.time;
                         this.updatePlayPauseIcon(true);
                         window.APP.showPlayer();
-                    }).catch(err => window.APP.showToast("Could not play audio.", true));
+                    }).catch(err => window.APP.showToast("Could not play audio.", true) );
                 },
-                togglePlayPause() { if (!window.APP.state.currentAudiobook) return; this.audio.paused ? this.audio.play() : this.audio.pause(); this.updatePlayPauseIcon(!this.audio.paused); },
-                updatePlayPauseIcon(isPlaying) { document.getElementById('player-play-icon').style.display = isPlaying ? 'none' : 'block'; document.getElementById('player-pause-icon').style.display = isPlaying ? 'block' : 'none'; },
+                togglePlayPause() {
+                    if (!window.APP.state.currentAudiobook) return;
+                    this.audio.paused ? this.audio.play() : this.audio.pause();
+                    this.updatePlayPauseIcon(!this.audio.paused);
+                },
+                updatePlayPauseIcon(isPlaying) {
+                     document.getElementById('player-play-icon').style.display = isPlaying ? 'none' : 'block';
+                     document.getElementById('player-pause-icon').style.display = isPlaying ? 'block' : 'none';
+                },
                 formatTime(s) { return isNaN(s) ? '0:00' : `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`; },
-                onMetadataLoaded() { document.getElementById('player-duration').textContent = this.formatTime(this.audio.duration); document.getElementById('player-progress').max = this.audio.duration; },
+                onMetadataLoaded() {
+                    document.getElementById('player-duration').textContent = this.formatTime(this.audio.duration);
+                    document.getElementById('player-progress').max = this.audio.duration;
+                },
                 updateProgressUI() {
                     if (!this.audio.duration) return;
                     document.getElementById('player-current-time').textContent = this.formatTime(this.audio.currentTime);
@@ -695,10 +681,16 @@
                 },
                 seek() { this.audio.currentTime = document.getElementById('player-progress').value; },
                 skip(s) { if (window.APP.state.currentAudiobook) this.audio.currentTime += s; },
-                changeSpeed(i) { const newRate = this.speeds[i]; this.audio.playbackRate = newRate; document.getElementById('player-speed-btn').textContent = `${newRate}x`; document.getElementById('player-speed-menu').classList.add('hidden'); },
+                changeSpeed(i) {
+                    const newRate = this.speeds[i];
+                    this.audio.playbackRate = newRate;
+                    document.getElementById('player-speed-btn').textContent = `${newRate}x`;
+                    document.getElementById('player-speed-menu').classList.add('hidden');
+                },
                 toggleSpeedMenu() { document.getElementById('player-speed-menu').classList.toggle('hidden'); }
             },
-
+            
+            // --- Event Listeners ---
             attachEventListeners() {
                 document.getElementById('request-form').addEventListener('submit', (e) => this.handleRequestSubmit(e));
                 document.getElementById('admin-login-form').addEventListener('submit', (e) => this.handleAdminLogin(e));
@@ -706,90 +698,14 @@
                 document.getElementById('player-progress').addEventListener('input', () => this.PLAYER.seek());
                 document.getElementById('player-speed-btn').addEventListener('click', (e) => { e.stopPropagation(); this.PLAYER.toggleSpeedMenu(); });
                 document.body.addEventListener('click', () => document.getElementById('player-speed-menu').classList.add('hidden'));
+
+                // Reader navigation
                 document.getElementById('prev-page').addEventListener('click', () => this.state.currentEpubRendition?.prev());
                 document.getElementById('next-page').addEventListener('click', () => this.state.currentEpubRendition?.next());
-
-                const themeToggleEl = document.getElementById('theme-toggle');
-                const themeBall = document.getElementById('theme-toggle-ball');
-                if (themeToggleEl) {
-                    themeToggleEl.addEventListener('click', (e) => {
-                        const isDark = !document.documentElement.classList.contains('dark');
-                        document.documentElement.classList.toggle('dark', isDark);
-                        try { localStorage.setItem('zen_theme', isDark ? 'dark' : 'light'); } catch(e){}
-                        themeBall.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
-                        if (this.state.currentEpubRendition) {
-                            try {
-                                const mode = isDark ? 'zen-dark-mode' : 'zen-light-mode';
-                                if (this.state.currentEpubRendition.themes.select) this.state.currentEpubRendition.themes.select(mode);
-                            } catch (err) {}
-                        }
-                    });
-                }
-
-                document.getElementById('toc-toggle').addEventListener('click', (e) => {
-                    this.state.tocVisible = !this.state.tocVisible;
-                    const panel = document.getElementById('toc-panel');
-                    panel.classList.toggle('hidden', !this.state.tocVisible);
-                    if(this.state.tocVisible) { lucide.createIcons(); }
-                });
-                document.getElementById('font-increase').addEventListener('click', () => {
-                    this.state.currentFontSizePercent = Math.min(160, this.state.currentFontSizePercent + 10);
-                    try { this.state.currentEpubRendition.themes.fontSize(`${this.state.currentFontSizePercent}%`); } catch(e) {}
-                });
-                document.getElementById('font-decrease').addEventListener('click', () => {
-                    this.state.currentFontSizePercent = Math.max(70, this.state.currentFontSizePercent - 10);
-                    try { this.state.currentEpubRendition.themes.fontSize(`${this.state.currentFontSizePercent}%`); } catch(e) {}
-                });
-                document.getElementById('font-toggle').addEventListener('click', (e) => {
-                    this.state.isSerif = !this.state.isSerif;
-                    document.getElementById('font-toggle').textContent = this.state.isSerif ? 'Sans' : 'Serif';
-                    try { if (this.state.isSerif) this.state.currentEpubRendition.themes.select('zen-serif'); else this.state.currentEpubRendition.themes.select('zen-base'); } catch(e){}
-                });
-                
-                // Add swipe controls for epub reader
-                const viewer = document.getElementById('epub-viewer');
-                let touchstartX = 0;
-                let touchendX = 0;
-                let touchstartY = 0;
-                let touchendY = 0;
-
-                const handleSwipeGesture = () => {
-                    if (!this.state.currentEpubRendition) return;
-                    const deltaX = touchendX - touchstartX;
-                    const deltaY = touchendY - touchstartY;
-                    // Ignore vertical swipes or short horizontal swipes
-                    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) return; 
-
-                    if (touchendX < touchstartX) { // Swiped left
-                        this.state.currentEpubRendition.next();
-                    }
-                    if (touchendX > touchstartX) { // Swiped right
-                        this.state.currentEpubRendition.prev();
-                    }
-                };
-
-                viewer.addEventListener('touchstart', e => {
-                    touchstartX = e.changedTouches[0].screenX;
-                    touchstartY = e.changedTouches[0].screenY;
-                }, { passive: true });
-
-                viewer.addEventListener('touchend', e => {
-                    touchendX = e.changedTouches[0].screenX;
-                    touchendY = e.changedTouches[0].screenY;
-                    handleSwipeGesture();
-                });
-            },
-
-            loadTheme() {
-                const stored = localStorage.getItem('zen_theme');
-                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                const theme = stored || (prefersDark ? 'dark' : 'light');
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-                const ball = document.getElementById('theme-toggle-ball');
-                if (ball) ball.style.transform = theme === 'dark' ? 'translateX(20px)' : 'translateX(0)';
             }
         };
 
+        // --- Start the App ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             if(!GITHUB_BASE_URL.includes("your-username.github.io")) {
@@ -802,7 +718,7 @@
                 </div>`;
             }
         });
+
     </script>
 </body>
 </html>
-
